@@ -228,7 +228,7 @@ void setup()
         lv_indev_set_read_cb(lvInput, my_touchpad_read);
 
         ui_init();
-
+//test
         Serial.println("Setup done");
     }
 }

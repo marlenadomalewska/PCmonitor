@@ -33,15 +33,14 @@
 #define LGFX_USE_V1
 
 #include <Arduino.h>
-#include "main.h"
 #include <lvgl.h>
 #include <LovyanGFX.hpp>
 #include <eez-framework.h>
 #include "TaskManagerIO.h"
-// #include "ui/ui.h"
-// #include "ui/screens.h"
-// #include "ui/actions.h"
-// #include "ui/images.h"
+#include "ui/ui.h"
+#include "ui/screens.h"
+#include "ui/actions.h"
+#include "ui/images.h"
 
 #define SCR 8
 class LGFX : public lgfx::LGFX_Device
@@ -150,9 +149,8 @@ LGFX tft;
 // Define NTP Client to get time
 const char *ntpServer = "europe.pool.ntp.org";
 const char *timeOffset = "CET-1CEST,M3.5.0,M10.5.0/3";
-
-HTTPClient http;
-
+static const uint32_t screenWidth = 480;
+static const uint32_t screenHeight = 320;
 const unsigned int lvBufferSize = screenWidth * SCR;
 static lv_color_t disp_draw_buf[lvBufferSize];  // Buffer for the display, must be at least as large as the screen size
 static lv_color_t disp_draw_buf2[lvBufferSize]; // Second buffer for the display, must be at least as large as the screen size
@@ -228,7 +226,7 @@ void setup()
         lv_indev_set_read_cb(lvInput, my_touchpad_read);
 
         ui_init();
-//test
+
         Serial.println("Setup done");
     }
 }

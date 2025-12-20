@@ -15,6 +15,7 @@ extern const lv_font_t ui_font_michroma_90;
 extern const lv_font_t ui_font_michroma_20;
 extern const lv_font_t ui_font_michroma_30;
 extern const lv_font_t ui_font_michroma_15;
+extern const lv_font_t ui_font_michroma_25;
 
 
 #ifdef __cplusplus

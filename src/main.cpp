@@ -42,7 +42,7 @@
 #include "ui/actions.h"
 #include "ui/images.h"
 
-#define SCR 8
+#define SCR 32
 class LGFX : public lgfx::LGFX_Device
 {
 
@@ -234,9 +234,18 @@ void setup()
 void loop()
 {
     /* let the GUI do its work */
+    static uint32_t lastTick = 0;
+    uint32_t now = millis();
+    if (now - lastTick >= 5)
+    {
+        lv_tick_inc(now - lastTick);
+        lastTick = now;
+    }
+
     ui_tick();
     lv_timer_handler();
-    lv_tick_inc(5);
 
     taskManager.runLoop();
+
+    delay(1);
 }

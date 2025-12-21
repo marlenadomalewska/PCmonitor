@@ -23,7 +23,9 @@ void create_screen_main() {
     {
         lv_obj_t *parent_obj = obj;
         {
+            // tabview
             lv_obj_t *obj = lv_tabview_create(parent_obj);
+            objects.tabview = obj;
             lv_obj_set_pos(obj, 0, 0);
             lv_obj_set_size(obj, 480, 320);
             lv_tabview_set_tab_bar_position(obj, LV_DIR_TOP);
@@ -35,6 +37,17 @@ void create_screen_main() {
                     // All
                     lv_obj_t *obj = lv_tabview_add_tab(parent_obj, "All");
                     objects.all = obj;
+                    {
+                        lv_obj_t *parent_obj = obj;
+                        {
+                            // sensor_value
+                            lv_obj_t *obj = lv_label_create(parent_obj);
+                            objects.sensor_value = obj;
+                            lv_obj_set_pos(obj, 8, 15);
+                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                            lv_label_set_text(obj, "Text");
+                        }
+                    }
                 }
                 {
                     // CPU
@@ -212,9 +225,9 @@ void create_screen_main() {
                             {
                                 lv_obj_t *parent_obj = obj;
                                 {
-                                    // ram_percentage_virtual_details_1
+                                    // ram_percentage_virtual_details
                                     lv_obj_t *obj = lv_label_create(parent_obj);
-                                    objects.ram_percentage_virtual_details_1 = obj;
+                                    objects.ram_percentage_virtual_details = obj;
                                     lv_obj_set_pos(obj, 34, 107);
                                     lv_obj_set_size(obj, 148, 37);
                                     lv_obj_set_style_text_font(obj, &ui_font_michroma_30, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -362,7 +375,7 @@ void tick_user_widget_core_cpu(void *flowState, int startWidgetIndex) {
 
 
 static const char *screen_names[] = { "Main" };
-static const char *object_names[] = { "main", "all", "cpu", "gpu", "gpu_voltage_max", "gpu_voltage", "ram", "obj0", "ram_virtual_available", "ram_virtual_used", "ram_available", "ram_used", "ram_percentage_virtual_details_arc", "ram_percentage_details_arc", "ram_percentage_virtual_details_1", "ram_percentage_details" };
+static const char *object_names[] = { "main", "tabview", "all", "sensor_value", "cpu", "gpu", "gpu_voltage_max", "gpu_voltage", "ram", "obj0", "ram_virtual_available", "ram_virtual_used", "ram_available", "ram_used", "ram_percentage_virtual_details_arc", "ram_percentage_details_arc", "ram_percentage_virtual_details", "ram_percentage_details" };
 
 
 typedef void (*tick_screen_func_t)();

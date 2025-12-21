@@ -9,7 +9,9 @@ extern "C" {
 
 typedef struct _objects_t {
     lv_obj_t *main;
+    lv_obj_t *tabview;
     lv_obj_t *all;
+    lv_obj_t *sensor_value;
     lv_obj_t *cpu;
     lv_obj_t *gpu;
     lv_obj_t *gpu_voltage_max;
@@ -22,7 +24,7 @@ typedef struct _objects_t {
     lv_obj_t *ram_used;
     lv_obj_t *ram_percentage_virtual_details_arc;
     lv_obj_t *ram_percentage_details_arc;
-    lv_obj_t *ram_percentage_virtual_details_1;
+    lv_obj_t *ram_percentage_virtual_details;
     lv_obj_t *ram_percentage_details;
 } objects_t;
 

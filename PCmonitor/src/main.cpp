@@ -35,6 +35,9 @@
 #include <Arduino.h>
 #include <lvgl.h>
 #include <LovyanGFX.hpp>
+#include "driver/uart.h"
+#include <ArduinoJson.h>
+#include <StreamUtils.h>
 #include <eez-framework.h>
 #include "TaskManagerIO.h"
 #include "ui/ui.h"
@@ -143,6 +146,34 @@ public:
     }
 };
 
+struct SensorData
+{
+    String id;
+    String name;
+    String hardware;
+    String type;
+    float value;
+    String unit;
+};
+
+enum Tabs
+{
+    ALL,
+    CPU,
+    GPU,
+    RAM
+};
+
+#define UART_PORT UART_NUM_0
+#define UART_TX_PIN 43
+#define UART_RX_PIN 44
+#define UART_BAUD_RATE 115200
+#define BUF_SIZE 1024
+static const char *TAG = "UART_ESPNOW";
+
+static int64_t last_packet_time = 0;
+uint8_t bcast_addr[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
 // Create an instance of the prepared class.
 LGFX tft;
 
@@ -155,6 +186,19 @@ const unsigned int lvBufferSize = screenWidth * SCR;
 static lv_color_t disp_draw_buf[lvBufferSize];  // Buffer for the display, must be at least as large as the screen size
 static lv_color_t disp_draw_buf2[lvBufferSize]; // Second buffer for the display, must be at least as large as the screen size
 uint8_t lvBuffer[2][lvBufferSize];
+// Allocate the JSON document
+JsonDocument doc;
+
+// Bufor na dane z portu szeregowego
+const int BUFFER_SIZE = 2048;
+char jsonBuffer[BUFFER_SIZE];
+int bufferIndex = 0;
+
+// Maksymalna liczba sensorów
+const int MAX_SENSORS = 20;
+SensorData sensors[MAX_SENSORS];
+int sensorCount = 0;
+String timestamp = "";
 
 /* Display flushing */
 void my_disp_flush(lv_display_t *display, const lv_area_t *area, unsigned char *data)
@@ -231,8 +275,181 @@ void setup()
     }
 }
 
+void uart_espnow_init(void)
+{
+    const uart_config_t uart_config = {
+        .baud_rate = UART_BAUD_RATE,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
+
+    uart_driver_install(UART_PORT, BUF_SIZE * 2, 0, 0, NULL, 0);
+    uart_param_config(UART_PORT, &uart_config);
+    uart_set_pin(UART_PORT, UART_TX_PIN, UART_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+
+    ESP_LOGI(TAG, "UART initialized (TX=%d RX=%d @ %d baud)", UART_TX_PIN, UART_RX_PIN, UART_BAUD_RATE);
+}
+
+bool receiveJsonData()
+{
+    while (Serial.available())
+    {
+        char c = Serial.read();
+
+        // Koniec linii = koniec JSON
+        if (c == '\n' || c == '\r')
+        {
+            if (bufferIndex > 0)
+            {
+                jsonBuffer[bufferIndex] = '\0';
+                bufferIndex = 0;
+                return true;
+            }
+        }
+        else if (bufferIndex < BUFFER_SIZE - 1)
+        {
+            jsonBuffer[bufferIndex++] = c;
+        }
+    }
+    return false;
+}
+
+bool parseJsonData()
+{
+    // Alokuj dokument JSON
+    // Rozmiar zależy od liczby sensorów - dostosuj w razie potrzeby
+    JsonDocument doc;
+
+    // Parsuj JSON
+    DeserializationError error = deserializeJson(doc, jsonBuffer);
+
+    if (error)
+    {
+        Serial.print("JSON Parse Error: ");
+        Serial.println(error.c_str());
+        return false;
+    }
+
+    // Pobierz timestamp
+    timestamp = doc["timestamp"].as<String>();
+
+    // Pobierz tablicę sensorów
+    JsonArray sensorsArray = doc["sensors"].as<JsonArray>();
+    sensorCount = 0;
+
+    for (JsonObject sensor : sensorsArray)
+    {
+        if (sensorCount >= MAX_SENSORS)
+            break;
+
+        sensors[sensorCount].id = sensor["id"].as<String>();
+        sensors[sensorCount].name = sensor["name"].as<String>();
+        sensors[sensorCount].hardware = sensor["hardware"].as<String>();
+        sensors[sensorCount].type = sensor["type"].as<String>();
+        sensors[sensorCount].value = sensor["value"].as<float>();
+        sensors[sensorCount].unit = sensor["unit"].as<String>();
+
+        sensorCount++;
+    }
+
+    return true;
+}
+// ============================================
+// Funkcje pomocnicze do pobierania danych
+// ============================================
+
+// Znajdź sensor po nazwie
+SensorData *findSensorByName(const char *name)
+{
+    for (int i = 0; i < sensorCount; i++)
+    {
+        if (sensors[i].name.equalsIgnoreCase(name))
+        {
+            return &sensors[i];
+        }
+    }
+    return nullptr;
+}
+
+// Znajdź sensor po typie (zwraca pierwszy znaleziony)
+SensorData *findSensorByType(const char *type)
+{
+    for (int i = 0; i < sensorCount; i++)
+    {
+        if (sensors[i].type.equalsIgnoreCase(type))
+        {
+            return &sensors[i];
+        }
+    }
+    return nullptr;
+}
+
+// Pobierz wszystkie sensory danego typu
+int getSensorsByType(const char *type, SensorData *result[], int maxResults)
+{
+    int count = 0;
+    for (int i = 0; i < sensorCount && count < maxResults; i++)
+    {
+        if (sensors[i].type.equalsIgnoreCase(type))
+        {
+            result[count++] = &sensors[i];
+        }
+    }
+    return count;
+}
+
+// Pobierz wartość sensora po nazwie (zwraca -999 jeśli nie znaleziono)
+float getSensorValue(const char *name)
+{
+    SensorData *sensor = findSensorByName(name);
+    return sensor ? sensor->value : -999.0f;
+}
+
+const char *getSensorUnit(const char *name)
+{
+    SensorData *sensor = findSensorByName(name);
+    return sensor ? sensor->unit.c_str() : "";
+}
+
+void displayRamDetails()
+{
+    lv_label_set_text_fmt(objects.ram_used, "%s %s", String(getSensorValue("Memory Used"), 1).c_str(), getSensorUnit("Memory Used"));
+    lv_label_set_text_fmt(objects.ram_available, "%s %s", String(getSensorValue("Memory Available"), 1).c_str(), getSensorUnit("Memory Available"));
+    lv_label_set_text(objects.ram_percentage_details, String(getSensorValue("Memory"), 1).c_str());
+    lv_arc_set_value(objects.ram_percentage_details_arc, (int)getSensorValue("Memory"));
+    lv_label_set_text_fmt(objects.ram_virtual_used, "%s %s", String(getSensorValue("Virtual Memory Used"), 1).c_str(), getSensorUnit("Virtual Memory Used"));
+    lv_label_set_text_fmt(objects.ram_virtual_available, "%s %s", String(getSensorValue("Virtual Memory Available"), 1).c_str(), getSensorUnit("Virtual Memory Available"));
+    lv_label_set_text(objects.ram_percentage_virtual_details, String(getSensorValue("Virtual Memory"), 1).c_str());
+    lv_arc_set_value(objects.ram_percentage_virtual_details_arc, (int)getSensorValue("Virtual Memory"));
+}
+
+void displayData()
+{
+    uint8_t active_index = lv_tabview_get_tab_active(objects.tabview);
+    if (active_index == Tabs::RAM)
+    {
+        displayRamDetails();
+    }
+}
+
 void loop()
 {
+
+    // Odbierz dane z portu szeregowego
+    if (receiveJsonData())
+    {
+        // Parsuj JSON
+        if (parseJsonData())
+        {
+            // Wyświetl dane
+            displayData();
+
+            // Tutaj możesz dodać kod do wyświetlania na LCD/OLED
+            // updateDisplay();
+        }
+    }
+
     /* let the GUI do its work */
     static uint32_t lastTick = 0;
     uint32_t now = millis();

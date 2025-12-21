@@ -55,6 +55,19 @@ int getSensorsByType(const char *type, SensorData *result[], int maxResults)
     }
     return count;
 }
+
+int getSensorsByTypeAndHardware(const char *type, const char *hardware, SensorData *result[], int maxResults)
+{
+    int count = 0;
+    for (int i = 0; i < sensorCount && count < maxResults; i++)
+    {
+        if (sensors[i].type.equalsIgnoreCase(type) && sensors[i].hardware.equalsIgnoreCase(hardware))
+        {
+            result[count++] = &sensors[i];
+        }
+    }
+    return count;
+}
 // Pobierz wartość sensora po nazwie (zwraca -999 jeśli nie znaleziono)
 float getSensorValue(const char *name)
 {

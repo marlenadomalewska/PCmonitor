@@ -348,10 +348,11 @@ void displayGpuDetails()
     lv_label_set_text_fmt(objects.gpu_fan, "%s %s", String(fan->value, 1).c_str(), fan->unit.c_str());
 
     // LOAD
+    // bierze ramn-zleee
     SensorData *loads[2];
-    getSensorsByType("Load", loads, 2);
-    lv_label_set_text_fmt(objects.gpu_load_core, "%s %s", String(loads[0]->value, 1).c_str(), loads[0]->unit.c_str());
-    lv_label_set_text_fmt(objects.gpu_load_memory, "%s %s", String(loads[1]->value, 1).c_str(), loads[1]->unit.c_str());
+    getSensorsByTypeAndHardware("Load", "AMD Radeon RX 6800", loads, 2);
+    lv_label_set_text_fmt(objects.gpu_load_core, "%s %s", String(loads[0]->value, 1).c_str(), loads[0]->unit.c_str());   // zle
+    lv_label_set_text_fmt(objects.gpu_load_memory, "%s %s", String(loads[1]->value, 1).c_str(), loads[1]->unit.c_str()); // zle
 
     // POWER
     SensorData *power = findSensorByType("Power");

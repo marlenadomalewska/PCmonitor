@@ -44,6 +44,7 @@
 #include "ui/screens.h"
 #include "ui/actions.h"
 #include "ui/images.h"
+#include "sensor.h"
 
 #define SCR 32
 class LGFX : public lgfx::LGFX_Device
@@ -146,16 +147,6 @@ public:
     }
 };
 
-struct SensorData
-{
-    String id;
-    String name;
-    String hardware;
-    String type;
-    float value;
-    String unit;
-};
-
 enum Tabs
 {
     ALL,
@@ -193,12 +184,6 @@ JsonDocument doc;
 const int BUFFER_SIZE = 2048;
 char jsonBuffer[BUFFER_SIZE];
 int bufferIndex = 0;
-
-// Maksymalna liczba sensorów
-const int MAX_SENSORS = 20;
-SensorData sensors[MAX_SENSORS];
-int sensorCount = 0;
-String timestamp = "";
 
 /* Display flushing */
 void my_disp_flush(lv_display_t *display, const lv_area_t *area, unsigned char *data)
@@ -317,9 +302,6 @@ bool receiveJsonData()
 
 bool parseJsonData()
 {
-    // Alokuj dokument JSON
-    // Rozmiar zależy od liczby sensorów - dostosuj w razie potrzeby
-    JsonDocument doc;
 
     // Parsuj JSON
     DeserializationError error = deserializeJson(doc, jsonBuffer);
@@ -330,9 +312,6 @@ bool parseJsonData()
         Serial.println(error.c_str());
         return false;
     }
-
-    // Pobierz timestamp
-    timestamp = doc["timestamp"].as<String>();
 
     // Pobierz tablicę sensorów
     JsonArray sensorsArray = doc["sensors"].as<JsonArray>();
@@ -354,62 +333,6 @@ bool parseJsonData()
     }
 
     return true;
-}
-// ============================================
-// Funkcje pomocnicze do pobierania danych
-// ============================================
-
-// Znajdź sensor po nazwie
-SensorData *findSensorByName(const char *name)
-{
-    for (int i = 0; i < sensorCount; i++)
-    {
-        if (sensors[i].name.equalsIgnoreCase(name))
-        {
-            return &sensors[i];
-        }
-    }
-    return nullptr;
-}
-
-// Znajdź sensor po typie (zwraca pierwszy znaleziony)
-SensorData *findSensorByType(const char *type)
-{
-    for (int i = 0; i < sensorCount; i++)
-    {
-        if (sensors[i].type.equalsIgnoreCase(type))
-        {
-            return &sensors[i];
-        }
-    }
-    return nullptr;
-}
-
-// Pobierz wszystkie sensory danego typu
-int getSensorsByType(const char *type, SensorData *result[], int maxResults)
-{
-    int count = 0;
-    for (int i = 0; i < sensorCount && count < maxResults; i++)
-    {
-        if (sensors[i].type.equalsIgnoreCase(type))
-        {
-            result[count++] = &sensors[i];
-        }
-    }
-    return count;
-}
-
-// Pobierz wartość sensora po nazwie (zwraca -999 jeśli nie znaleziono)
-float getSensorValue(const char *name)
-{
-    SensorData *sensor = findSensorByName(name);
-    return sensor ? sensor->value : -999.0f;
-}
-
-const char *getSensorUnit(const char *name)
-{
-    SensorData *sensor = findSensorByName(name);
-    return sensor ? sensor->unit.c_str() : "";
 }
 
 void displayRamDetails()

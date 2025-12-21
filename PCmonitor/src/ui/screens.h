@@ -11,11 +11,15 @@ typedef struct _objects_t {
     lv_obj_t *main;
     lv_obj_t *tabview;
     lv_obj_t *all;
-    lv_obj_t *sensor_value;
     lv_obj_t *cpu;
     lv_obj_t *gpu;
-    lv_obj_t *gpu_voltage_max;
-    lv_obj_t *gpu_voltage;
+    lv_obj_t *gpu_fan;
+    lv_obj_t *gpu_load_memory;
+    lv_obj_t *gpu_load_core;
+    lv_obj_t *gpu_temp_hot_spot;
+    lv_obj_t *gpu_temp_core;
+    lv_obj_t *gpu_power_max;
+    lv_obj_t *gpu_power;
     lv_obj_t *ram;
     lv_obj_t *obj0;
     lv_obj_t *ram_virtual_available;

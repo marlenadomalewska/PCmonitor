@@ -335,12 +335,37 @@ bool parseJsonData()
     return true;
 }
 
+void displayGpuDetails()
+{
+    // TEMPERATURE
+    SensorData *temperatures[2];
+    getSensorsByType("Temperature", temperatures, 2);
+    lv_label_set_text_fmt(objects.gpu_temp_core, "%s %s", String(temperatures[0]->value, 1).c_str(), temperatures[0]->unit.c_str());
+    lv_label_set_text_fmt(objects.gpu_temp_hot_spot, "%s %s", String(temperatures[1]->value, 1).c_str(), temperatures[1]->unit.c_str());
+
+    // FAN
+    SensorData *fan = findSensorByType("Control");
+    lv_label_set_text_fmt(objects.gpu_fan, "%s %s", String(fan->value, 1).c_str(), fan->unit.c_str());
+
+    // LOAD
+    SensorData *loads[2];
+    getSensorsByType("Load", loads, 2);
+    lv_label_set_text_fmt(objects.gpu_load_core, "%s %s", String(loads[0]->value, 1).c_str(), loads[0]->unit.c_str());
+    lv_label_set_text_fmt(objects.gpu_load_memory, "%s %s", String(loads[1]->value, 1).c_str(), loads[1]->unit.c_str());
+
+    // POWER
+    SensorData *power = findSensorByType("Power");
+    lv_label_set_text_fmt(objects.gpu_power, "%s %s", String(power->value, 1).c_str(), power->unit.c_str());
+}
+
 void displayRamDetails()
 {
     lv_label_set_text_fmt(objects.ram_used, "%s %s", String(getSensorValue("Memory Used"), 1).c_str(), getSensorUnit("Memory Used"));
     lv_label_set_text_fmt(objects.ram_available, "%s %s", String(getSensorValue("Memory Available"), 1).c_str(), getSensorUnit("Memory Available"));
     lv_label_set_text(objects.ram_percentage_details, String(getSensorValue("Memory"), 1).c_str());
     lv_arc_set_value(objects.ram_percentage_details_arc, (int)getSensorValue("Memory"));
+
+    // VIRTUAL
     lv_label_set_text_fmt(objects.ram_virtual_used, "%s %s", String(getSensorValue("Virtual Memory Used"), 1).c_str(), getSensorUnit("Virtual Memory Used"));
     lv_label_set_text_fmt(objects.ram_virtual_available, "%s %s", String(getSensorValue("Virtual Memory Available"), 1).c_str(), getSensorUnit("Virtual Memory Available"));
     lv_label_set_text(objects.ram_percentage_virtual_details, String(getSensorValue("Virtual Memory"), 1).c_str());
@@ -350,7 +375,17 @@ void displayRamDetails()
 void displayData()
 {
     uint8_t active_index = lv_tabview_get_tab_active(objects.tabview);
-    if (active_index == Tabs::RAM)
+    if (active_index == Tabs::ALL)
+    {
+    }
+    else if (active_index == Tabs::CPU)
+    {
+    }
+    else if (active_index == Tabs::GPU)
+    {
+        displayGpuDetails();
+    }
+    else if (active_index == Tabs::RAM)
     {
         displayRamDetails();
     }

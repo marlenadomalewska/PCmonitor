@@ -338,39 +338,35 @@ bool parseJsonData()
 void displayGpuDetails()
 {
     // TEMPERATURE
-    SensorData *core = findSensor("GPU Core", TEMPERATURE_TYPE, GPU_HARDWARE);
-    if (core)
+    if (SensorData *core = findSensor("GPU Core", TEMPERATURE_TYPE, GPU_HARDWARE))
     {
         lv_label_set_text_fmt(objects.gpu_temp_core, "%s %s", String(core->value, 1).c_str(), core->unit.c_str());
     }
-    SensorData *hotSpot = findSensor("GPU Hot Spot", TEMPERATURE_TYPE, GPU_HARDWARE);
-    if (hotSpot)
+    if (SensorData *hotSpot = findSensor("GPU Hot Spot", TEMPERATURE_TYPE, GPU_HARDWARE))
     {
-        lv_label_set_text_fmt(objects.gpu_temp_hot_spot, "%s %s", String(hotSpot->value, 1).c_str(), hotSpot->unit.c_str());
+        lv_label_set_text_fmt(objects.gpu_temp_hot_spot, "%s oC", String(hotSpot->value, 1).c_str());
     }
 
     // FAN
-    SensorData *fan = findSensor("GPU Fan", CONTROL_TYPE, GPU_HARDWARE);
-    if (fan)
+    if (SensorData *fan = findSensor("GPU Fan", CONTROL_TYPE, GPU_HARDWARE))
     {
         lv_label_set_text_fmt(objects.gpu_fan, "%s %s", String(fan->value, 1).c_str(), fan->unit.c_str());
     }
 
     // LOAD
-    SensorData *loadCore = findSensor("GPU Core", LOAD_TYPE, GPU_HARDWARE);
-    if (loadCore)
+
+    if (SensorData *loadCore = findSensor("GPU Core", LOAD_TYPE, GPU_HARDWARE))
     {
         lv_label_set_text_fmt(objects.gpu_load_core, "%s %s", String(loadCore->value, 1).c_str(), loadCore->unit.c_str());
     }
-    SensorData *loadMemory = findSensor("GPU Memory", LOAD_TYPE, GPU_HARDWARE);
-    if (loadMemory)
+    if (SensorData *loadMemory = findSensor("GPU Memory", LOAD_TYPE, GPU_HARDWARE))
     {
         lv_label_set_text_fmt(objects.gpu_load_memory, "%s %s", String(loadMemory->value, 1).c_str(), loadMemory->unit.c_str());
     }
 
     // POWER
-    SensorData *powerSensor = findSensor("GPU Package", POWER_TYPE, GPU_HARDWARE);
-    if (powerSensor)
+
+    if (SensorData *powerSensor = findSensor("GPU Package", POWER_TYPE, GPU_HARDWARE))
     {
         lv_label_set_text_fmt(objects.gpu_power, "%s %s", String(powerSensor->value, 1).c_str(), powerSensor->unit.c_str());
     }
@@ -379,37 +375,32 @@ void displayGpuDetails()
 void displayRamDetails()
 {
     // PHYSICAL
-    SensorData *used = findSensor("Memory Used", DATA_TYPE, RAM_HARDWARE);
-    if (used)
+
+    if (SensorData *used = findSensor("Memory Used", DATA_TYPE, RAM_HARDWARE))
     {
         lv_label_set_text_fmt(objects.ram_used, "%s %s", String(used->value, 1).c_str(), used->unit.c_str());
     }
-    SensorData *available = findSensor("Memory Available", DATA_TYPE, RAM_HARDWARE);
-    if (available)
+    if (SensorData *available = findSensor("Memory Available", DATA_TYPE, RAM_HARDWARE))
     {
         lv_label_set_text_fmt(objects.ram_available, "%s %s", String(available->value, 1).c_str(), available->unit.c_str());
     }
 
     // VIRTUAL
-    SensorData *vUsed = findSensor("Virtual Memory Used", DATA_TYPE, RAM_HARDWARE);
-    if (vUsed)
+
+    if (SensorData *vUsed = findSensor("Virtual Memory Used", DATA_TYPE, RAM_HARDWARE))
     {
         lv_label_set_text_fmt(objects.ram_virtual_used, "%s %s", String(vUsed->value, 1).c_str(), vUsed->unit.c_str());
     }
-    SensorData *vAvailable = findSensor("Virtual Memory Available", DATA_TYPE, RAM_HARDWARE);
-    if (vAvailable)
+    if (SensorData *vAvailable = findSensor("Virtual Memory Available", DATA_TYPE, RAM_HARDWARE))
     {
         lv_label_set_text_fmt(objects.ram_virtual_available, "%s %s", String(vAvailable->value, 1).c_str(), vAvailable->unit.c_str());
     }
-
-    SensorData *total = findSensor("Memory", LOAD_TYPE, RAM_HARDWARE);
-    if (total)
+    if (SensorData *total = findSensor("Memory", LOAD_TYPE, RAM_HARDWARE))
     {
         lv_label_set_text(objects.ram_percentage_details, String(total->value, 1).c_str());
         lv_arc_set_value(objects.ram_percentage_details_arc, (int)total->value);
     }
-    SensorData *vTotal = findSensor("Virtual Memory", LOAD_TYPE, RAM_HARDWARE);
-    if (vTotal)
+    if (SensorData *vTotal = findSensor("Virtual Memory", LOAD_TYPE, RAM_HARDWARE))
     {
         lv_label_set_text(objects.ram_percentage_virtual_details, String(vTotal->value, 1).c_str());
         lv_arc_set_value(objects.ram_percentage_virtual_details_arc, (int)vTotal->value);

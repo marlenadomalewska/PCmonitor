@@ -145,7 +145,7 @@ void create_screen_main() {
                                     lv_obj_t *obj = lv_label_create(parent_obj);
                                     objects.gpu_temp_hot_spot = obj;
                                     lv_obj_set_pos(obj, -11, 88);
-                                    lv_obj_set_size(obj, 73, LV_SIZE_CONTENT);
+                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                                     lv_obj_set_style_text_font(obj, &ui_font_michroma_15, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_label_set_text(obj, "99,9 C");
                                 }
@@ -184,31 +184,13 @@ void create_screen_main() {
                             {
                                 lv_obj_t *parent_obj = obj;
                                 {
-                                    lv_obj_t *obj = lv_label_create(parent_obj);
-                                    lv_obj_set_pos(obj, 149, 16);
-                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-                                    lv_obj_set_style_text_font(obj, &ui_font_michroma_15, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_label_set_text(obj, "Max");
-                                }
-                                {
-                                    // gpu_power_max
-                                    lv_obj_t *obj = lv_label_create(parent_obj);
-                                    objects.gpu_power_max = obj;
-                                    lv_obj_set_pos(obj, 120, 34);
-                                    lv_obj_set_size(obj, 73, LV_SIZE_CONTENT);
-                                    lv_obj_set_style_text_font(obj, &ui_font_michroma_15, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_label_set_text(obj, "1,0 V");
-                                }
-                                {
                                     // gpu_power
                                     lv_obj_t *obj = lv_label_create(parent_obj);
                                     objects.gpu_power = obj;
                                     lv_obj_set_pos(obj, -11, 23);
                                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                                     lv_obj_set_style_text_font(obj, &ui_font_michroma_30, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_label_set_text(obj, "0,0 V");
+                                    lv_label_set_text(obj, "0,0 W");
                                 }
                                 {
                                     lv_obj_t *obj = lv_label_create(parent_obj);
@@ -490,7 +472,7 @@ void tick_user_widget_core_cpu(void *flowState, int startWidgetIndex) {
 
 
 static const char *screen_names[] = { "Main" };
-static const char *object_names[] = { "main", "tabview", "all", "cpu", "gpu", "gpu_fan", "gpu_load_memory", "gpu_load_core", "gpu_temp_hot_spot", "gpu_temp_core", "gpu_power_max", "gpu_power", "ram", "obj0", "ram_virtual_available", "ram_virtual_used", "ram_available", "ram_used", "ram_percentage_virtual_details_arc", "ram_percentage_details_arc", "ram_percentage_virtual_details", "ram_percentage_details" };
+static const char *object_names[] = { "main", "tabview", "all", "cpu", "gpu", "gpu_fan", "gpu_load_memory", "gpu_load_core", "gpu_temp_hot_spot", "gpu_temp_core", "gpu_power", "ram", "obj0", "ram_virtual_available", "ram_virtual_used", "ram_available", "ram_used", "ram_percentage_virtual_details_arc", "ram_percentage_details_arc", "ram_percentage_virtual_details", "ram_percentage_details" };
 
 
 typedef void (*tick_screen_func_t)();

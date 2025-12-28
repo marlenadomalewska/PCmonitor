@@ -2,16 +2,46 @@
 #define SENSOR_H
 #include <ArduinoJson.h>
 
-const char *GPU_HARDWARE = "AMD Radeon RX 6800";
-const char *CPU_HARDWARE = "AMD Ryzen 5 5600X";
-const char *RAM_HARDWARE = "Generic Memory";
+const char *HARDWARE_GPU = "AMD Radeon RX 6800";
+const char *HARDWARE_CPU = "AMD Ryzen 5 5600";
+const char *HARDWARE_RAM = "Generic Memory";
+const char *HARDWARE_MOBO = "ASUS TUF GAMING B550-PLUS";
 
-const char *TEMPERATURE_TYPE = "Temperature";
-const char *CONTROL_TYPE = "Control";
-const char *LOAD_TYPE = "Load";
-const char *POWER_TYPE = "Power";
-const char *MEMORY_TYPE = "Memory";
-const char *DATA_TYPE = "Data";
+const char *TYPE_TEMPERATURE = "Temperature";
+const char *TYPE_CONTROL = "Control";
+const char *TYPE_LOAD = "Load";
+const char *TYPE_POWER = "Power";
+const char *TYPE_MEMORY = "Memory";
+const char *TYPE_DATA = "Data";
+
+// CPU
+const char *ITEM_CPU_TOTAL = "CPU Total";
+const char *ITEM_CPU_CORE_MAX = "CPU Core Max";
+const char *ITEM_CPU_PACKAGE = "Package";
+const char *ITEM_CPU_TEMPERATURE = "Core (Tctl/Tdie)";
+
+// GPU
+const char *ITEM_GPU_CORE = "GPU Core";
+const char *ITEM_GPU_HOT_SPOT = "GPU Hot Spot";
+const char *ITEM_GPU_FAN = "GPU Fan";
+const char *ITEM_GPU_MEMORY = "GPU Memory";
+const char *ITEM_GPU_PACKAGE = "GPU Package";
+// RAM
+const char *ITEM_MEMORY_USED = "Memory Used";
+const char *ITEM_MEMORY_AVAILABLE = "Memory Available";
+const char *ITEM_VIRTUAL_MEMORY_USED = "Virtual Memory Used";
+const char *ITEM_VIRTUAL_MEMORY_AVAILABLE = "Virtual Memory Available";
+const char *ITEM_MEMORY = "Memory";
+const char *ITEM_VIRTUAL_MEMORY = "Virtual Memory";
+
+enum Tabs
+{
+    ALL,
+    MOBO,
+    CPU,
+    GPU,
+    RAM
+};
 
 struct SensorData
 {
@@ -23,7 +53,7 @@ struct SensorData
     String unit;
 };
 // Maksymalna liczba sensorów
-const int MAX_SENSORS = 20;
+const int MAX_SENSORS = 30;
 SensorData sensors[MAX_SENSORS];
 int sensorCount = 0;
 
@@ -68,7 +98,7 @@ SensorData *findSensorByType(const char *type)
 SensorData *findSensor(const char *name, const char *type, const char *hardware)
 {
     for (int i = 0; i < sensorCount; i++)
-    {
+    { // invert logic and check for null
         if (sensors[i].type.equalsIgnoreCase(type) && sensors[i].hardware.equalsIgnoreCase(hardware) && sensors[i].name.equalsIgnoreCase(name))
         {
             return &sensors[i];
@@ -114,6 +144,11 @@ const char *getSensorUnit(const char *name)
 {
     SensorData *sensor = findSensorByName(name);
     return sensor ? sensor->unit.c_str() : "";
+}
+
+String sensorToString(const SensorData *sensor)
+{
+    return "ID: " + sensor->id + ", Name: " + sensor->name + ", Hardware: " + sensor->hardware + ", Type: " + sensor->type + ", Value: " + String(sensor->value) + ", Unit: " + sensor->unit;
 }
 
 #endif

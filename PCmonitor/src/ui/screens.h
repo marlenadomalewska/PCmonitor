@@ -10,25 +10,30 @@ extern "C" {
 typedef struct _objects_t {
     lv_obj_t *main;
     lv_obj_t *tabview;
-    lv_obj_t *all;
-    lv_obj_t *cpu;
-    lv_obj_t *gpu;
-    lv_obj_t *gpu_fan;
-    lv_obj_t *gpu_load_memory;
-    lv_obj_t *gpu_load_core;
-    lv_obj_t *gpu_temp_hot_spot;
-    lv_obj_t *gpu_temp_core;
-    lv_obj_t *gpu_power;
-    lv_obj_t *ram;
+    lv_obj_t *tab_all;
+    lv_obj_t *tab_mobo;
+    lv_obj_t *tab_cpu;
+    lv_obj_t *label_cpu_temperature;
+    lv_obj_t *label_cpu_load_max;
+    lv_obj_t *label_cpu_load_total;
+    lv_obj_t *label_cpu_power;
+    lv_obj_t *tab_gpu;
+    lv_obj_t *label_gpu_fan;
+    lv_obj_t *label_gpu_load_memory;
+    lv_obj_t *label_gpu_load_core;
+    lv_obj_t *label_gpu_temp_hot_spot;
+    lv_obj_t *label_gpu_temp_core;
+    lv_obj_t *label_gpu_power;
+    lv_obj_t *tab_ram;
     lv_obj_t *obj0;
-    lv_obj_t *ram_virtual_available;
-    lv_obj_t *ram_virtual_used;
-    lv_obj_t *ram_available;
-    lv_obj_t *ram_used;
-    lv_obj_t *ram_percentage_virtual_details_arc;
-    lv_obj_t *ram_percentage_details_arc;
-    lv_obj_t *ram_percentage_virtual_details;
-    lv_obj_t *ram_percentage_details;
+    lv_obj_t *label_ram_virtual_available;
+    lv_obj_t *label_ram_virtual_used;
+    lv_obj_t *label_ram_available;
+    lv_obj_t *label_ram_used;
+    lv_obj_t *arc_ram_percentage_virtual_details;
+    lv_obj_t *arc_ram_percentage_details;
+    lv_obj_t *label_ram_percentage_virtual_details;
+    lv_obj_t *label_ram_percentage_details;
 } objects_t;
 
 extern objects_t objects;
@@ -39,9 +44,6 @@ enum ScreensEnum {
 
 void create_screen_main();
 void tick_screen_main();
-
-void create_user_widget_core_cpu(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex);
-void tick_user_widget_core_cpu(void *flowState, int startWidgetIndex);
 
 void tick_screen_by_id(enum ScreensEnum screenId);
 void tick_screen(int screen_index);

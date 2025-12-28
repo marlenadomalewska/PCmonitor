@@ -147,14 +147,6 @@ public:
     }
 };
 
-enum Tabs
-{
-    ALL,
-    CPU,
-    GPU,
-    RAM
-};
-
 #define UART_PORT UART_NUM_0
 #define UART_TX_PIN 43
 #define UART_RX_PIN 44
@@ -181,7 +173,7 @@ uint8_t lvBuffer[2][lvBufferSize];
 JsonDocument doc;
 
 // Bufor na dane z portu szeregowego
-const int BUFFER_SIZE = 2048;
+const int BUFFER_SIZE = 4096;
 char jsonBuffer[BUFFER_SIZE];
 int bufferIndex = 0;
 
@@ -335,75 +327,92 @@ bool parseJsonData()
     return true;
 }
 
+void displayCpuDetails()
+{
+    // TEMPERATURE
+    if (SensorData *temperature = findSensor(ITEM_CPU_TEMPERATURE, TYPE_TEMPERATURE, HARDWARE_CPU))
+    {
+        lv_label_set_text_fmt(objects.label_cpu_temperature, "%s %s", String(temperature->value, 1).c_str(), temperature->unit.c_str());
+    }
+    if (SensorData *loadMax = findSensor(ITEM_CPU_CORE_MAX, TYPE_LOAD, HARDWARE_CPU))
+    {
+        lv_label_set_text_fmt(objects.label_cpu_load_max, "%s %s", String(loadMax->value, 1).c_str(), loadMax->unit.c_str());
+    }
+    if (SensorData *loadTotal = findSensor(ITEM_CPU_TOTAL, TYPE_LOAD, HARDWARE_CPU))
+    {
+        lv_label_set_text_fmt(objects.label_cpu_load_total, "%s %s", String(loadTotal->value, 1).c_str(), loadTotal->unit.c_str());
+    }
+    if (SensorData *package = findSensor(ITEM_CPU_PACKAGE, TYPE_POWER, HARDWARE_CPU))
+    {
+        lv_label_set_text_fmt(objects.label_cpu_power, "%s %s", String(package->value, 1).c_str(), package->unit.c_str());
+    }
+}
+
 void displayGpuDetails()
 {
     // TEMPERATURE
-    if (SensorData *core = findSensor("GPU Core", TEMPERATURE_TYPE, GPU_HARDWARE))
+    if (SensorData *core = findSensor(ITEM_GPU_CORE, TYPE_TEMPERATURE, HARDWARE_GPU))
     {
-        lv_label_set_text_fmt(objects.gpu_temp_core, "%s %s", String(core->value, 1).c_str(), core->unit.c_str());
+        lv_label_set_text_fmt(objects.label_gpu_temp_core, "%s %s", String(core->value, 1).c_str(), core->unit.c_str());
     }
-    if (SensorData *hotSpot = findSensor("GPU Hot Spot", TEMPERATURE_TYPE, GPU_HARDWARE))
+    if (SensorData *hotSpot = findSensor(ITEM_GPU_HOT_SPOT, TYPE_TEMPERATURE, HARDWARE_GPU))
     {
-        lv_label_set_text_fmt(objects.gpu_temp_hot_spot, "%s oC", String(hotSpot->value, 1).c_str());
+        lv_label_set_text_fmt(objects.label_gpu_temp_hot_spot, "%s oC", String(hotSpot->value, 1).c_str());
     }
 
     // FAN
-    if (SensorData *fan = findSensor("GPU Fan", CONTROL_TYPE, GPU_HARDWARE))
+    if (SensorData *fan = findSensor(ITEM_GPU_FAN, TYPE_CONTROL, HARDWARE_GPU))
     {
-        lv_label_set_text_fmt(objects.gpu_fan, "%s %s", String(fan->value, 1).c_str(), fan->unit.c_str());
+        lv_label_set_text_fmt(objects.label_gpu_fan, "%s %s", String(fan->value, 1).c_str(), fan->unit.c_str());
     }
 
     // LOAD
-
-    if (SensorData *loadCore = findSensor("GPU Core", LOAD_TYPE, GPU_HARDWARE))
+    if (SensorData *loadCore = findSensor(ITEM_GPU_CORE, TYPE_LOAD, HARDWARE_GPU))
     {
-        lv_label_set_text_fmt(objects.gpu_load_core, "%s %s", String(loadCore->value, 1).c_str(), loadCore->unit.c_str());
+        lv_label_set_text_fmt(objects.label_gpu_load_core, "%s %s", String(loadCore->value, 1).c_str(), loadCore->unit.c_str());
     }
-    if (SensorData *loadMemory = findSensor("GPU Memory", LOAD_TYPE, GPU_HARDWARE))
+    if (SensorData *loadMemory = findSensor(ITEM_GPU_MEMORY, TYPE_LOAD, HARDWARE_GPU))
     {
-        lv_label_set_text_fmt(objects.gpu_load_memory, "%s %s", String(loadMemory->value, 1).c_str(), loadMemory->unit.c_str());
+        lv_label_set_text_fmt(objects.label_gpu_load_memory, "%s %s", String(loadMemory->value, 1).c_str(), loadMemory->unit.c_str());
     }
 
     // POWER
-
-    if (SensorData *powerSensor = findSensor("GPU Package", POWER_TYPE, GPU_HARDWARE))
+    if (SensorData *powerSensor = findSensor(ITEM_GPU_PACKAGE, TYPE_POWER, HARDWARE_GPU))
     {
-        lv_label_set_text_fmt(objects.gpu_power, "%s %s", String(powerSensor->value, 1).c_str(), powerSensor->unit.c_str());
+        lv_label_set_text_fmt(objects.label_gpu_power, "%s %s", String(powerSensor->value, 1).c_str(), powerSensor->unit.c_str());
     }
 }
 
 void displayRamDetails()
 {
     // PHYSICAL
-
-    if (SensorData *used = findSensor("Memory Used", DATA_TYPE, RAM_HARDWARE))
+    if (SensorData *used = findSensor(ITEM_MEMORY_USED, TYPE_DATA, HARDWARE_RAM))
     {
-        lv_label_set_text_fmt(objects.ram_used, "%s %s", String(used->value, 1).c_str(), used->unit.c_str());
+        lv_label_set_text_fmt(objects.label_ram_used, "%s %s", String(used->value, 1).c_str(), used->unit.c_str());
     }
-    if (SensorData *available = findSensor("Memory Available", DATA_TYPE, RAM_HARDWARE))
+    if (SensorData *available = findSensor(ITEM_MEMORY_AVAILABLE, TYPE_DATA, HARDWARE_RAM))
     {
-        lv_label_set_text_fmt(objects.ram_available, "%s %s", String(available->value, 1).c_str(), available->unit.c_str());
+        lv_label_set_text_fmt(objects.label_ram_available, "%s %s", String(available->value, 1).c_str(), available->unit.c_str());
     }
 
     // VIRTUAL
-
-    if (SensorData *vUsed = findSensor("Virtual Memory Used", DATA_TYPE, RAM_HARDWARE))
+    if (SensorData *vUsed = findSensor(ITEM_VIRTUAL_MEMORY_USED, TYPE_DATA, HARDWARE_RAM))
     {
-        lv_label_set_text_fmt(objects.ram_virtual_used, "%s %s", String(vUsed->value, 1).c_str(), vUsed->unit.c_str());
+        lv_label_set_text_fmt(objects.label_ram_virtual_used, "%s %s", String(vUsed->value, 1).c_str(), vUsed->unit.c_str());
     }
-    if (SensorData *vAvailable = findSensor("Virtual Memory Available", DATA_TYPE, RAM_HARDWARE))
+    if (SensorData *vAvailable = findSensor(ITEM_VIRTUAL_MEMORY_AVAILABLE, TYPE_DATA, HARDWARE_RAM))
     {
-        lv_label_set_text_fmt(objects.ram_virtual_available, "%s %s", String(vAvailable->value, 1).c_str(), vAvailable->unit.c_str());
+        lv_label_set_text_fmt(objects.label_ram_virtual_available, "%s %s", String(vAvailable->value, 1).c_str(), vAvailable->unit.c_str());
     }
-    if (SensorData *total = findSensor("Memory", LOAD_TYPE, RAM_HARDWARE))
+    if (SensorData *total = findSensor(ITEM_MEMORY, TYPE_LOAD, HARDWARE_RAM))
     {
-        lv_label_set_text(objects.ram_percentage_details, String(total->value, 1).c_str());
-        lv_arc_set_value(objects.ram_percentage_details_arc, (int)total->value);
+        lv_label_set_text(objects.label_ram_percentage_details, String(total->value, 1).c_str());
+        lv_arc_set_value(objects.arc_ram_percentage_details, (int)total->value);
     }
-    if (SensorData *vTotal = findSensor("Virtual Memory", LOAD_TYPE, RAM_HARDWARE))
+    if (SensorData *vTotal = findSensor(ITEM_VIRTUAL_MEMORY, TYPE_LOAD, HARDWARE_RAM))
     {
-        lv_label_set_text(objects.ram_percentage_virtual_details, String(vTotal->value, 1).c_str());
-        lv_arc_set_value(objects.ram_percentage_virtual_details_arc, (int)vTotal->value);
+        lv_label_set_text(objects.label_ram_percentage_virtual_details, String(vTotal->value, 1).c_str());
+        lv_arc_set_value(objects.arc_ram_percentage_virtual_details, (int)vTotal->value);
     }
 }
 
@@ -413,8 +422,13 @@ void displayData()
     if (active_index == Tabs::ALL)
     {
     }
+    else if (active_index == Tabs::MOBO)
+    {
+        /* code */
+    }
     else if (active_index == Tabs::CPU)
     {
+        displayCpuDetails();
     }
     else if (active_index == Tabs::GPU)
     {

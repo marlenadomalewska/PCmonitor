@@ -233,7 +233,8 @@
                   },
                   "icon": "svg:user_widget"
                 }
-              ]
+              ],
+              "active": true
             },
             {
               "type": "tabset",
@@ -248,8 +249,7 @@
                   "enableClose": false,
                   "icon": "svg:properties"
                 }
-              ],
-              "active": true
+              ]
             }
           ]
         }
@@ -1006,17 +1006,7 @@
         "0": {
           "0": {
             "0": {},
-            "1": {},
-            "2": {
-              "0": {},
-              "1": {},
-              "2": {
-                "1": {
-                  "$selected": true
-                }
-              },
-              "3": {}
-            }
+            "1": {}
           }
         }
       },

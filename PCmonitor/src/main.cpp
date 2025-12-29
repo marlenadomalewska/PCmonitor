@@ -36,15 +36,14 @@
 #include <lvgl.h>
 #include <LovyanGFX.hpp>
 #include "driver/uart.h"
-#include <ArduinoJson.h>
-#include <StreamUtils.h>
+// #include <StreamUtils.h>
 #include <eez-framework.h>
 #include "TaskManagerIO.h"
 #include "ui/ui.h"
 #include "ui/screens.h"
 #include "ui/actions.h"
 #include "ui/images.h"
-#include "sensor.h"
+#include "HWMonitor/HwMonitor.h"
 
 #define SCR 32
 class LGFX : public lgfx::LGFX_Device
@@ -169,13 +168,17 @@ const unsigned int lvBufferSize = screenWidth * SCR;
 static lv_color_t disp_draw_buf[lvBufferSize];  // Buffer for the display, must be at least as large as the screen size
 static lv_color_t disp_draw_buf2[lvBufferSize]; // Second buffer for the display, must be at least as large as the screen size
 uint8_t lvBuffer[2][lvBufferSize];
-// Allocate the JSON document
-JsonDocument doc;
 
-// Bufor na dane z portu szeregowego
-const int BUFFER_SIZE = 4096;
-char jsonBuffer[BUFFER_SIZE];
-int bufferIndex = 0;
+HWMonitor monitor;
+
+enum Tabs
+{
+    ALL,
+    MOBO,
+    CPU,
+    GPU,
+    RAM
+};
 
 /* Display flushing */
 void my_disp_flush(lv_display_t *display, const lv_area_t *area, unsigned char *data)
@@ -219,8 +222,8 @@ void my_touchpad_read(lv_indev_t *dev, lv_indev_data_t *data)
 
 void setup()
 {
+    Serial.setRxBufferSize(4096);
     Serial.begin(115200);
-
     tft.init();
     tft.initDMA();
     tft.startWrite();
@@ -248,6 +251,8 @@ void setup()
 
         ui_init();
 
+        monitor.begin();
+
         Serial.println("Setup done");
     }
 }
@@ -268,159 +273,49 @@ void uart_espnow_init(void)
     ESP_LOGI(TAG, "UART initialized (TX=%d RX=%d @ %d baud)", UART_TX_PIN, UART_RX_PIN, UART_BAUD_RATE);
 }
 
-bool receiveJsonData()
-{
-    while (Serial.available())
-    {
-        char c = Serial.read();
-
-        // Koniec linii = koniec JSON
-        if (c == '\n' || c == '\r')
-        {
-            if (bufferIndex > 0)
-            {
-                jsonBuffer[bufferIndex] = '\0';
-                bufferIndex = 0;
-                return true;
-            }
-        }
-        else if (bufferIndex < BUFFER_SIZE - 1)
-        {
-            jsonBuffer[bufferIndex++] = c;
-        }
-    }
-    return false;
-}
-
-bool parseJsonData()
+void displayAll()
 {
 
-    // Parsuj JSON
-    DeserializationError error = deserializeJson(doc, jsonBuffer);
-
-    if (error)
-    {
-        Serial.print("JSON Parse Error: ");
-        Serial.println(error.c_str());
-        return false;
-    }
-
-    // Pobierz tablicę sensorów
-    JsonArray sensorsArray = doc["sensors"].as<JsonArray>();
-    sensorCount = 0;
-
-    for (JsonObject sensor : sensorsArray)
-    {
-        if (sensorCount >= MAX_SENSORS)
-            break;
-
-        sensors[sensorCount].id = sensor["id"].as<String>();
-        sensors[sensorCount].name = sensor["name"].as<String>();
-        sensors[sensorCount].hardware = sensor["hardware"].as<String>();
-        sensors[sensorCount].type = sensor["type"].as<String>();
-        sensors[sensorCount].value = sensor["value"].as<float>();
-        sensors[sensorCount].unit = sensor["unit"].as<String>();
-
-        sensorCount++;
-    }
-
-    return true;
+    lv_label_set_text_fmt(objects.label_all_fps, "%.0f", monitor.get(0x0B));
 }
 
 void displayCpuDetails()
 {
-    // TEMPERATURE
-    if (SensorData *temperature = findSensor(ITEM_CPU_TEMPERATURE, TYPE_TEMPERATURE, HARDWARE_CPU))
-    {
-        lv_label_set_text_fmt(objects.label_cpu_temperature, "%s %s", String(temperature->value, 1).c_str(), temperature->unit.c_str());
-    }
-    if (SensorData *loadMax = findSensor(ITEM_CPU_CORE_MAX, TYPE_LOAD, HARDWARE_CPU))
-    {
-        lv_label_set_text_fmt(objects.label_cpu_load_max, "%s %s", String(loadMax->value, 1).c_str(), loadMax->unit.c_str());
-    }
-    if (SensorData *loadTotal = findSensor(ITEM_CPU_TOTAL, TYPE_LOAD, HARDWARE_CPU))
-    {
-        lv_label_set_text_fmt(objects.label_cpu_load_total, "%s %s", String(loadTotal->value, 1).c_str(), loadTotal->unit.c_str());
-    }
-    if (SensorData *package = findSensor(ITEM_CPU_PACKAGE, TYPE_POWER, HARDWARE_CPU))
-    {
-        lv_label_set_text_fmt(objects.label_cpu_power, "%s %s", String(package->value, 1).c_str(), package->unit.c_str());
-    }
+    lv_label_set_text_fmt(objects.label_cpu_temperature, "%.1f oC", monitor.get(0x04)); // ok
+    lv_label_set_text_fmt(objects.label_cpu_load_max, "%.1f %%", monitor.get(0x02));
+    lv_label_set_text_fmt(objects.label_cpu_load_total, "%.1f %%", monitor.get(0x01)); // ok
+    lv_label_set_text_fmt(objects.label_cpu_power, "%.1f W", monitor.get(0x03));       // ok
 }
 
 void displayGpuDetails()
 {
-    // TEMPERATURE
-    if (SensorData *core = findSensor(ITEM_GPU_CORE, TYPE_TEMPERATURE, HARDWARE_GPU))
-    {
-        lv_label_set_text_fmt(objects.label_gpu_temp_core, "%s %s", String(core->value, 1).c_str(), core->unit.c_str());
-    }
-    if (SensorData *hotSpot = findSensor(ITEM_GPU_HOT_SPOT, TYPE_TEMPERATURE, HARDWARE_GPU))
-    {
-        lv_label_set_text_fmt(objects.label_gpu_temp_hot_spot, "%s oC", String(hotSpot->value, 1).c_str());
-    }
-
-    // FAN
-    if (SensorData *fan = findSensor(ITEM_GPU_FAN, TYPE_CONTROL, HARDWARE_GPU))
-    {
-        lv_label_set_text_fmt(objects.label_gpu_fan, "%s %s", String(fan->value, 1).c_str(), fan->unit.c_str());
-    }
-
-    // LOAD
-    if (SensorData *loadCore = findSensor(ITEM_GPU_CORE, TYPE_LOAD, HARDWARE_GPU))
-    {
-        lv_label_set_text_fmt(objects.label_gpu_load_core, "%s %s", String(loadCore->value, 1).c_str(), loadCore->unit.c_str());
-    }
-    if (SensorData *loadMemory = findSensor(ITEM_GPU_MEMORY, TYPE_LOAD, HARDWARE_GPU))
-    {
-        lv_label_set_text_fmt(objects.label_gpu_load_memory, "%s %s", String(loadMemory->value, 1).c_str(), loadMemory->unit.c_str());
-    }
-
-    // POWER
-    if (SensorData *powerSensor = findSensor(ITEM_GPU_PACKAGE, TYPE_POWER, HARDWARE_GPU))
-    {
-        lv_label_set_text_fmt(objects.label_gpu_power, "%s %s", String(powerSensor->value, 1).c_str(), powerSensor->unit.c_str());
-    }
+    lv_label_set_text_fmt(objects.label_gpu_temp_core, "%.1f oC", monitor.get(0x0D)); // ok
+    lv_label_set_text_fmt(objects.label_gpu_temp_hot_spot, "%.1f oC", monitor.get(0x0E));
+    lv_label_set_text_fmt(objects.label_gpu_fan, "%.1f %%", monitor.get(0x0F));
+    lv_label_set_text_fmt(objects.label_gpu_load_core, "%.1f %%", monitor.get(0x10));
+    lv_label_set_text_fmt(objects.label_gpu_load_memory, "%.1f %%", monitor.get(0x11));
+    lv_label_set_text_fmt(objects.label_gpu_power, "%.1f W", monitor.get(0x0C)); // ok
 }
 
 void displayRamDetails()
 {
-    // PHYSICAL
-    if (SensorData *used = findSensor(ITEM_MEMORY_USED, TYPE_DATA, HARDWARE_RAM))
-    {
-        lv_label_set_text_fmt(objects.label_ram_used, "%s %s", String(used->value, 1).c_str(), used->unit.c_str());
-    }
-    if (SensorData *available = findSensor(ITEM_MEMORY_AVAILABLE, TYPE_DATA, HARDWARE_RAM))
-    {
-        lv_label_set_text_fmt(objects.label_ram_available, "%s %s", String(available->value, 1).c_str(), available->unit.c_str());
-    }
-
-    // VIRTUAL
-    if (SensorData *vUsed = findSensor(ITEM_VIRTUAL_MEMORY_USED, TYPE_DATA, HARDWARE_RAM))
-    {
-        lv_label_set_text_fmt(objects.label_ram_virtual_used, "%s %s", String(vUsed->value, 1).c_str(), vUsed->unit.c_str());
-    }
-    if (SensorData *vAvailable = findSensor(ITEM_VIRTUAL_MEMORY_AVAILABLE, TYPE_DATA, HARDWARE_RAM))
-    {
-        lv_label_set_text_fmt(objects.label_ram_virtual_available, "%s %s", String(vAvailable->value, 1).c_str(), vAvailable->unit.c_str());
-    }
-    if (SensorData *total = findSensor(ITEM_MEMORY, TYPE_LOAD, HARDWARE_RAM))
-    {
-        lv_label_set_text(objects.label_ram_percentage_details, String(total->value, 1).c_str());
-        lv_arc_set_value(objects.arc_ram_percentage_details, (int)total->value);
-    }
-    if (SensorData *vTotal = findSensor(ITEM_VIRTUAL_MEMORY, TYPE_LOAD, HARDWARE_RAM))
-    {
-        lv_label_set_text(objects.label_ram_percentage_virtual_details, String(vTotal->value, 1).c_str());
-        lv_arc_set_value(objects.arc_ram_percentage_virtual_details, (int)vTotal->value);
-    }
+    lv_label_set_text_fmt(objects.label_ram_used, "%.1f %%", monitor.get(0x05)); // ok
+    lv_label_set_text_fmt(objects.label_ram_available, "%.1f %%", monitor.get(0x06));
+    lv_label_set_text_fmt(objects.label_ram_virtual_used, "%.1f %%", monitor.get(0x08));
+    lv_label_set_text_fmt(objects.label_ram_virtual_available, "%.1f %%", monitor.get(0x09));
+    lv_label_set_text_fmt(objects.label_ram_percentage_details, "%.1f", monitor.get(0x07));                // ok
+    lv_arc_set_value(objects.arc_ram_percentage_details, static_cast<int>(std::round(monitor.get(0x07)))); // ok
+    lv_label_set_text_fmt(objects.label_ram_percentage_virtual_details, "%.1f", monitor.get(0x0A));
+    lv_arc_set_value(objects.arc_ram_percentage_virtual_details, static_cast<int>(std::round(monitor.get(0x0A))));
 }
 
 void displayData()
 {
+
     uint8_t active_index = lv_tabview_get_tab_active(objects.tabview);
     if (active_index == Tabs::ALL)
     {
+        displayAll();
     }
     else if (active_index == Tabs::MOBO)
     {
@@ -443,18 +338,16 @@ void displayData()
 void loop()
 {
 
-    // Odbierz dane z portu szeregowego
-    if (receiveJsonData())
+    if (monitor.update(Serial))
     {
-        // Parsuj JSON
-        if (parseJsonData())
-        {
-            // Wyświetl dane
-            displayData();
+        displayData();
+        // String debug;
+        // for (size_t i = 0; i < 17; i++)
+        // {
+        //     debug += "0x" + String(monitor.getSensorByIndex(i)->id, HEX) + " ";
+        // }
 
-            // Tutaj możesz dodać kod do wyświetlania na LCD/OLED
-            // updateDisplay();
-        }
+        // lv_label_set_text(objects.test, debug.c_str());
     }
 
     /* let the GUI do its work */

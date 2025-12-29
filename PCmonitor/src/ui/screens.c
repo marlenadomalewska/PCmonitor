@@ -37,6 +37,43 @@ void create_screen_main() {
                     // tabALL
                     lv_obj_t *obj = lv_tabview_add_tab(parent_obj, "All");
                     objects.tab_all = obj;
+                    {
+                        lv_obj_t *parent_obj = obj;
+                        {
+                            // test
+                            lv_obj_t *obj = lv_label_create(parent_obj);
+                            objects.test = obj;
+                            lv_obj_set_pos(obj, 0, 92);
+                            lv_obj_set_size(obj, 445, LV_SIZE_CONTENT);
+                            lv_label_set_text(obj, "Text");
+                        }
+                        {
+                            lv_obj_t *obj = lv_obj_create(parent_obj);
+                            lv_obj_set_pos(obj, 0, 0);
+                            lv_obj_set_size(obj, 218, 82);
+                            lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICKABLE|LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
+                            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            {
+                                lv_obj_t *parent_obj = obj;
+                                {
+                                    // label_all_fps
+                                    lv_obj_t *obj = lv_label_create(parent_obj);
+                                    objects.label_all_fps = obj;
+                                    lv_obj_set_pos(obj, -11, 23);
+                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                    lv_obj_set_style_text_font(obj, &ui_font_michroma_30, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_label_set_text(obj, "0");
+                                }
+                                {
+                                    lv_obj_t *obj = lv_label_create(parent_obj);
+                                    lv_obj_set_pos(obj, -18, -8);
+                                    lv_obj_set_size(obj, 224, 18);
+                                    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_label_set_text(obj, "FPS");
+                                }
+                            }
+                        }
+                    }
                 }
                 {
                     // tab_mobo
@@ -493,7 +530,7 @@ void tick_screen_main() {
 
 
 static const char *screen_names[] = { "Main" };
-static const char *object_names[] = { "main", "tabview", "tab_all", "tab_mobo", "tab_cpu", "label_cpu_temperature", "label_cpu_load_max", "label_cpu_load_total", "label_cpu_power", "tab_gpu", "label_gpu_fan", "label_gpu_load_memory", "label_gpu_load_core", "label_gpu_temp_hot_spot", "label_gpu_temp_core", "label_gpu_power", "tab_ram", "obj0", "label_ram_virtual_available", "label_ram_virtual_used", "label_ram_available", "label_ram_used", "arc_ram_percentage_virtual_details", "arc_ram_percentage_details", "label_ram_percentage_virtual_details", "label_ram_percentage_details" };
+static const char *object_names[] = { "main", "tabview", "tab_all", "test", "label_all_fps", "tab_mobo", "tab_cpu", "label_cpu_temperature", "label_cpu_load_max", "label_cpu_load_total", "label_cpu_power", "tab_gpu", "label_gpu_fan", "label_gpu_load_memory", "label_gpu_load_core", "label_gpu_temp_hot_spot", "label_gpu_temp_core", "label_gpu_power", "tab_ram", "obj0", "label_ram_virtual_available", "label_ram_virtual_used", "label_ram_available", "label_ram_used", "arc_ram_percentage_virtual_details", "arc_ram_percentage_details", "label_ram_percentage_virtual_details", "label_ram_percentage_details" };
 
 
 typedef void (*tick_screen_func_t)();

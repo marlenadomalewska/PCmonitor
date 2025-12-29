@@ -1,7 +1,6 @@
 {
   "navigation": {
     "selectedUserPageObject": "[monitorGUI.eez-project]:/userPages/0",
-    "selectedUserWidgetObject": "[monitorGUI.eez-project]:/userWidgets/0",
     "selectedFontObject": "[monitorGUI.eez-project]:/fonts/8",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Widgets"
@@ -221,17 +220,6 @@
                     "permanent": false
                   },
                   "icon": "svg:page"
-                },
-                {
-                  "type": "tab",
-                  "id": "#59498b9e-930e-4e01-85d3-4f1201bd1133",
-                  "name": "CoreCPU",
-                  "component": "editor",
-                  "config": {
-                    "objectPath": "[monitorGUI.eez-project]:/userWidgets/0",
-                    "permanent": false
-                  },
-                  "icon": "svg:user_widget"
                 }
               ],
               "active": true
@@ -1005,14 +993,18 @@
       "selection": {
         "0": {
           "0": {
-            "0": {},
+            "0": {
+              "0": {
+                "$selected": true
+              }
+            },
             "1": {}
           }
         }
       },
       "transform": {
         "translate": {
-          "x": -163.33062698412675,
+          "x": -63.33062698412675,
           "y": -303.6754761904764
         },
         "scale": 1.1

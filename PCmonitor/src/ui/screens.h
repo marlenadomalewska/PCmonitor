@@ -11,6 +11,8 @@ typedef struct _objects_t {
     lv_obj_t *main;
     lv_obj_t *tabview;
     lv_obj_t *tab_all;
+    lv_obj_t *test;
+    lv_obj_t *label_all_fps;
     lv_obj_t *tab_mobo;
     lv_obj_t *tab_cpu;
     lv_obj_t *label_cpu_temperature;

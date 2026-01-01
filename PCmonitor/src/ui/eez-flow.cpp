@@ -4870,7 +4870,7 @@ namespace eez
         static int32_t anim_callback_get_width(lv_anim_t *a) { return lv_obj_get_width((lv_obj_t *)a->user_data); }
         static void anim_callback_set_height(void *obj, int32_t v) { lv_obj_set_height((lv_obj_t *)obj, v); }
         static int32_t anim_callback_get_height(lv_anim_t *a) { return lv_obj_get_height((lv_obj_t *)a->user_data); }
-        static void anim_callback_set_opacity(void *obj, int32_t v) { lv_obj_set_style_opa((lv_obj_t *)obj, v, 0); }
+        static void anim_callback_set_opacity(void *obj, int32_t v) { lv_obj_set_style_opa((lv_obj_t *)obj, v, (lv_part_t)0); }
         static int32_t anim_callback_get_opacity(lv_anim_t *a) { return lv_obj_get_style_opa((lv_obj_t *)a->user_data, (lv_part_t)0); }
         static void anim_callback_set_image_zoom(void *obj, int32_t v) { lv_img_set_zoom((lv_obj_t *)obj, v); }
         static int32_t anim_callback_get_image_zoom(lv_anim_t *a) { return lv_img_get_zoom((lv_obj_t *)a->user_data); }

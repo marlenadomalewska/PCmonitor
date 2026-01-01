@@ -136,7 +136,7 @@
             {
               "type": "row",
               "id": "#d467c78f-3a47-4e7a-8585-f13fdb6b1ab8",
-              "weight": 16.90551076353405,
+              "weight": 20.45218887794491,
               "children": [
                 {
                   "type": "tabset",
@@ -184,7 +184,8 @@
                       "enableClose": false,
                       "icon": "svg:hierarchy"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -206,7 +207,7 @@
             {
               "type": "tabset",
               "id": "EDITORS",
-              "weight": 60.55318185562042,
+              "weight": 57.02192361791208,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
@@ -221,13 +222,12 @@
                   },
                   "icon": "svg:page"
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "tabset",
               "id": "#a5775a3c-8cac-4953-a138-6c4efb44b9a9",
-              "weight": 22.54130738084553,
+              "weight": 22.52588750414303,
               "children": [
                 {
                   "type": "tab",
@@ -992,22 +992,17 @@
     "[monitorGUI.eez-project]:/userPages/0[flow-state]": {
       "selection": {
         "0": {
-          "0": {
-            "0": {
-              "0": {
-                "$selected": true
-              }
-            },
-            "1": {}
+          "1": {
+            "$selected": true
           }
         }
       },
       "transform": {
         "translate": {
-          "x": -63.33062698412675,
-          "y": -303.6754761904764
+          "x": -262.23541847041827,
+          "y": -207.2168831168832
         },
-        "scale": 1.1
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1076,7 +1071,7 @@
   "showComponentDescriptions": true,
   "logsPanelFilter": "all",
   "selectedStylePropertyName": "",
-  "lvglPart": "INDICATOR",
+  "lvglPart": "MAIN",
   "lvglState": "DEFAULT",
   "lvglExpandedPropertiesGroup": [
     "ARC",
@@ -1084,10 +1079,15 @@
     "MARGIN",
     "TEXT",
     "PADDING",
-    "LINE"
+    "MISCELLANEOUS",
+    "LINE",
+    "IMAGE",
+    "OUTLINE",
+    "BORDER",
+    "BACKGROUND"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 1.1,
+  "flowZoom": 1,
   "implementationLanguage": "C"
 }

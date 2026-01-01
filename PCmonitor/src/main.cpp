@@ -174,7 +174,6 @@ HWMonitor monitor;
 enum Tabs
 {
     ALL,
-    MOBO,
     CPU,
     GPU,
     RAM
@@ -273,38 +272,39 @@ void uart_espnow_init(void)
     ESP_LOGI(TAG, "UART initialized (TX=%d RX=%d @ %d baud)", UART_TX_PIN, UART_RX_PIN, UART_BAUD_RATE);
 }
 
-void displayAll()
-{
-
-    lv_label_set_text_fmt(objects.label_all_fps, "%.0f", monitor.get(0x0B));
-}
-
 void displayCpuDetails()
 {
-    lv_label_set_text_fmt(objects.label_cpu_temperature, "%.1f oC", monitor.get(0x04)); // ok
-    lv_label_set_text_fmt(objects.label_cpu_load_max, "%.1f %%", monitor.get(0x02));
-    lv_label_set_text_fmt(objects.label_cpu_load_total, "%.1f %%", monitor.get(0x01)); // ok
-    lv_label_set_text_fmt(objects.label_cpu_power, "%.1f W", monitor.get(0x03));       // ok
+    lv_label_set_text_fmt(objects.label_cpu_temperature, "%.1f oC", monitor.get(0x04));
+    lv_label_set_text_fmt(objects.label_cpu_load_core_max, "%.1f", monitor.get(0x02));
+    lv_label_set_text_fmt(objects.label_cpu_load_total, "%.1f", monitor.get(0x01));
+    lv_label_set_text_fmt(objects.label_cpu_power, "%.1f W", monitor.get(0x03));
+    lv_arc_set_value(objects.arc_cpu_load_core_max, static_cast<int>(std::round(monitor.get(0x02))));
+    lv_arc_set_value(objects.arc_cpu_load_total, static_cast<int>(std::round(monitor.get(0x01))));
 }
 
 void displayGpuDetails()
 {
-    lv_label_set_text_fmt(objects.label_gpu_temp_core, "%.1f oC", monitor.get(0x0D)); // ok
-    lv_label_set_text_fmt(objects.label_gpu_temp_hot_spot, "%.1f oC", monitor.get(0x0E));
-    lv_label_set_text_fmt(objects.label_gpu_fan, "%.1f %%", monitor.get(0x0F));
-    lv_label_set_text_fmt(objects.label_gpu_load_core, "%.1f %%", monitor.get(0x10));
-    lv_label_set_text_fmt(objects.label_gpu_load_memory, "%.1f %%", monitor.get(0x11));
-    lv_label_set_text_fmt(objects.label_gpu_power, "%.1f W", monitor.get(0x0C)); // ok
+    lv_bar_set_value(objects.bar_gpu_temp_core, static_cast<int>(std::round(monitor.get(0x0D))), LV_ANIM_ON);
+    lv_label_set_text_fmt(objects.label_gpu_temp_core, "%.1f oC", monitor.get(0x0D));
+    uint8_t hot_spot = static_cast<int>(std::round(monitor.get(0x0E)));
+    lv_bar_set_value(objects.bar_gpu_temp_hot_spot, hot_spot, LV_ANIM_ON);
+    lv_bar_set_start_value(objects.bar_gpu_temp_hot_spot, hot_spot - 1, LV_ANIM_ON);
+    lv_label_set_text_fmt(objects.label_gpu_framerate, "%.0f FPS", monitor.get(0x0B));
+    lv_label_set_text_fmt(objects.label_gpu_power, "%.1f W", monitor.get(0x0C));
+    lv_label_set_text_fmt(objects.label_gpu_load_core, "%.1f", monitor.get(0x10));
+    lv_arc_set_value(objects.arc_gpu_load_core, static_cast<int>(std::round(monitor.get(0x10))));
+    lv_label_set_text_fmt(objects.label_gpu_load_memory, "%.1f", monitor.get(0x11));
+    lv_arc_set_value(objects.arc_gpu_load_memory, static_cast<int>(std::round(monitor.get(0x11))));
 }
 
 void displayRamDetails()
 {
-    lv_label_set_text_fmt(objects.label_ram_used, "%.1f %%", monitor.get(0x05)); // ok
-    lv_label_set_text_fmt(objects.label_ram_available, "%.1f %%", monitor.get(0x06));
-    lv_label_set_text_fmt(objects.label_ram_virtual_used, "%.1f %%", monitor.get(0x08));
-    lv_label_set_text_fmt(objects.label_ram_virtual_available, "%.1f %%", monitor.get(0x09));
-    lv_label_set_text_fmt(objects.label_ram_percentage_details, "%.1f", monitor.get(0x07));                // ok
-    lv_arc_set_value(objects.arc_ram_percentage_details, static_cast<int>(std::round(monitor.get(0x07)))); // ok
+    lv_label_set_text_fmt(objects.label_ram_used, "%.1f GB", monitor.get(0x05));
+    lv_label_set_text_fmt(objects.label_ram_available, "%.1f GB", monitor.get(0x06));
+    lv_label_set_text_fmt(objects.label_ram_virtual_used, "%.1f GB", monitor.get(0x08));
+    lv_label_set_text_fmt(objects.label_ram_virtual_available, "%.1f GB", monitor.get(0x09));
+    lv_label_set_text_fmt(objects.label_ram_percentage_details, "%.1f", monitor.get(0x07));
+    lv_arc_set_value(objects.arc_ram_percentage_details, static_cast<int>(std::round(monitor.get(0x07))));
     lv_label_set_text_fmt(objects.label_ram_percentage_virtual_details, "%.1f", monitor.get(0x0A));
     lv_arc_set_value(objects.arc_ram_percentage_virtual_details, static_cast<int>(std::round(monitor.get(0x0A))));
 }
@@ -315,11 +315,6 @@ void displayData()
     uint8_t active_index = lv_tabview_get_tab_active(objects.tabview);
     if (active_index == Tabs::ALL)
     {
-        displayAll();
-    }
-    else if (active_index == Tabs::MOBO)
-    {
-        /* code */
     }
     else if (active_index == Tabs::CPU)
     {
@@ -346,8 +341,8 @@ void loop()
         // {
         //     debug += "0x" + String(monitor.getSensorByIndex(i)->id, HEX) + " ";
         // }
-
-        // lv_label_set_text(objects.test, debug.c_str());
+        int hot_spot = static_cast<int>(std::round(monitor.get(0x0E)));
+        lv_label_set_text_fmt(objects.test, "%d min: %d", hot_spot, hot_spot - 1);
     }
 
     /* let the GUI do its work */

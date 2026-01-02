@@ -24,7 +24,6 @@
           },
           {
             "type": "border",
-            "selected": 6,
             "size": 240,
             "location": "right",
             "children": [
@@ -184,8 +183,7 @@
                       "enableClose": false,
                       "icon": "svg:hierarchy"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -213,12 +211,12 @@
               "children": [
                 {
                   "type": "tab",
-                  "id": "#7202f654-caab-4565-8e87-14518e290e52",
+                  "id": "#9fb0ba4b-4cba-4901-b08c-adfb5b86bc82",
                   "name": "Main",
                   "component": "editor",
                   "config": {
                     "objectPath": "[monitorGUI.eez-project]:/userPages/0",
-                    "permanent": false
+                    "permanent": true
                   },
                   "icon": "svg:page"
                 }
@@ -237,7 +235,8 @@
                   "enableClose": false,
                   "icon": "svg:properties"
                 }
-              ]
+              ],
+              "active": true
             }
           ]
         }
@@ -992,17 +991,23 @@
     "[monitorGUI.eez-project]:/userPages/0[flow-state]": {
       "selection": {
         "0": {
-          "1": {
-            "$selected": true
+          "0": {
+            "2": {
+              "0": {
+                "$selected": true
+              },
+              "1": {},
+              "2": {}
+            }
           }
         }
       },
       "transform": {
         "translate": {
-          "x": -262.23541847041827,
-          "y": -207.2168831168832
+          "x": -410.5593308080804,
+          "y": -277.2685606060606
         },
-        "scale": 1
+        "scale": 1.75
       },
       "timeline": {
         "isEditorActive": false,
@@ -1071,7 +1076,7 @@
   "showComponentDescriptions": true,
   "logsPanelFilter": "all",
   "selectedStylePropertyName": "",
-  "lvglPart": "MAIN",
+  "lvglPart": "INDICATOR",
   "lvglState": "DEFAULT",
   "lvglExpandedPropertiesGroup": [
     "ARC",
@@ -1088,6 +1093,6 @@
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 1,
+  "flowZoom": 1.75,
   "implementationLanguage": "C"
 }

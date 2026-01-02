@@ -242,29 +242,6 @@ public:
      */
     void onSensor(HWSensorCallback callback);
 
-    // Convenience getters
-    inline float getCpuTemp() const { return get(SENSOR_CPU_TEMP); }
-    inline float getCpuLoad() const { return get(SENSOR_CPU_LOAD); }
-    inline float getCpuClock() const { return get(SENSOR_CPU_CLOCK); }
-    inline float getCpuPower() const { return get(SENSOR_CPU_POWER); }
-
-    inline float getGpuTemp() const { return get(SENSOR_GPU_TEMP); }
-    inline float getGpuLoad() const { return get(SENSOR_GPU_LOAD); }
-    inline float getGpuClock() const { return get(SENSOR_GPU_CLOCK); }
-    inline float getGpuPower() const { return get(SENSOR_GPU_POWER); }
-    inline float getGpuFan() const { return get(SENSOR_GPU_FAN); }
-    inline float getGpuHotspot() const { return get(SENSOR_GPU_HOTSPOT); }
-    inline float getGpuMemLoad() const { return get(SENSOR_GPU_LOAD_MEM); }
-
-    inline float getRamUsed() const { return get(SENSOR_RAM_USED); }
-    inline float getRamLoad() const { return get(SENSOR_RAM_LOAD); }
-
-    inline float getDiskTemp() const { return get(SENSOR_DISK_TEMP); }
-    inline float getDiskLoad() const { return get(SENSOR_DISK_LOAD); }
-
-    inline float getNetUp() const { return get(SENSOR_NET_UP); }
-    inline float getNetDown() const { return get(SENSOR_NET_DOWN); }
-
     // Statistics
     uint32_t packetsOK;
     uint32_t packetsError;

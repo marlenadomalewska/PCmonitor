@@ -36,7 +36,7 @@
 #include <lvgl.h>
 #include <LovyanGFX.hpp>
 #include "driver/uart.h"
-// #include <StreamUtils.h>
+#include "SmoothValue.h"
 #include <eez-framework.h>
 #include "TaskManagerIO.h"
 #include "ui/ui.h"
@@ -165,11 +165,12 @@ const char *timeOffset = "CET-1CEST,M3.5.0,M10.5.0/3";
 static const uint32_t screenWidth = 480;
 static const uint32_t screenHeight = 320;
 const unsigned int lvBufferSize = screenWidth * SCR;
-static lv_color_t disp_draw_buf[lvBufferSize];  // Buffer for the display, must be at least as large as the screen size
-static lv_color_t disp_draw_buf2[lvBufferSize]; // Second buffer for the display, must be at least as large as the screen size
+static lv_color_t disp_draw_buf[lvBufferSize * 2];  // Buffer for the display, must be at least as large as the screen size
+static lv_color_t disp_draw_buf2[lvBufferSize * 2]; // Second buffer for the display, must be at least as large as the screen size
 uint8_t lvBuffer[2][lvBufferSize];
 
-HWMonitor monitor;
+static HWMonitor monitor;
+static SmoothValueManager<32> s_smooth(0.05f);
 
 enum Tabs
 {
@@ -274,39 +275,40 @@ void uart_espnow_init(void)
 
 void displayCpuDetails()
 {
-    lv_label_set_text_fmt(objects.label_cpu_temperature, "%.1f oC", monitor.get(0x04));
-    lv_label_set_text_fmt(objects.label_cpu_load_core_max, "%.1f", monitor.get(0x02));
-    lv_label_set_text_fmt(objects.label_cpu_load_total, "%.1f", monitor.get(0x01));
-    lv_label_set_text_fmt(objects.label_cpu_power, "%.1f W", monitor.get(0x03));
-    lv_arc_set_value(objects.arc_cpu_load_core_max, static_cast<int>(std::round(monitor.get(0x02))));
-    lv_arc_set_value(objects.arc_cpu_load_total, static_cast<int>(std::round(monitor.get(0x01))));
+    lv_label_set_text_fmt(objects.label_cpu_temperature, "%.1f", s_smooth.get(0x04));
+    lv_bar_set_value(objects.bar_cpu_temperature, s_smooth.get(0x04), LV_ANIM_OFF);
+    lv_label_set_text_fmt(objects.label_cpu_load_core_max, "%.1f", s_smooth.get(0x02));
+    lv_label_set_text_fmt(objects.label_cpu_load_total, "%.1f", s_smooth.get(0x01));
+    lv_label_set_text_fmt(objects.label_cpu_power, "%.1f", s_smooth.get(0x03));
+    lv_arc_set_value(objects.arc_cpu_load_core_max, s_smooth.getInt(0x02));
+    lv_arc_set_value(objects.arc_cpu_load_total, s_smooth.getInt(0x01));
 }
 
 void displayGpuDetails()
 {
-    lv_bar_set_value(objects.bar_gpu_temp_core, static_cast<int>(std::round(monitor.get(0x0D))), LV_ANIM_ON);
-    lv_label_set_text_fmt(objects.label_gpu_temp_core, "%.1f oC", monitor.get(0x0D));
-    uint8_t hot_spot = static_cast<int>(std::round(monitor.get(0x0E)));
-    lv_bar_set_value(objects.bar_gpu_temp_hot_spot, hot_spot, LV_ANIM_ON);
-    lv_bar_set_start_value(objects.bar_gpu_temp_hot_spot, hot_spot - 1, LV_ANIM_ON);
-    lv_label_set_text_fmt(objects.label_gpu_framerate, "%.0f FPS", monitor.get(0x0B));
-    lv_label_set_text_fmt(objects.label_gpu_power, "%.1f W", monitor.get(0x0C));
-    lv_label_set_text_fmt(objects.label_gpu_load_core, "%.1f", monitor.get(0x10));
-    lv_arc_set_value(objects.arc_gpu_load_core, static_cast<int>(std::round(monitor.get(0x10))));
-    lv_label_set_text_fmt(objects.label_gpu_load_memory, "%.1f", monitor.get(0x11));
-    lv_arc_set_value(objects.arc_gpu_load_memory, static_cast<int>(std::round(monitor.get(0x11))));
+    uint8_t hot_spot = s_smooth.getInt(0x0E);
+    lv_bar_set_value(objects.bar_gpu_temp_hot_spot, hot_spot, LV_ANIM_OFF);
+    lv_bar_set_start_value(objects.bar_gpu_temp_hot_spot, hot_spot - 3, LV_ANIM_OFF);
+    lv_bar_set_value(objects.bar_gpu_temp_core, s_smooth.getInt(0x0D), LV_ANIM_OFF);
+    lv_label_set_text_fmt(objects.label_gpu_temp_core, "%.1f", s_smooth.get(0x0D));
+    lv_label_set_text_fmt(objects.label_gpu_framerate, "%d", s_smooth.getInt(0x0B) > 1000 ? 1000 : s_smooth.getInt(0x0B));
+    lv_label_set_text_fmt(objects.label_gpu_power, "%.1f", s_smooth.get(0x0C));
+    lv_label_set_text_fmt(objects.label_gpu_load_core, "%.1f", s_smooth.get(0x10));
+    lv_arc_set_value(objects.arc_gpu_load_core, s_smooth.getInt(0x10));
+    lv_label_set_text_fmt(objects.label_gpu_load_memory, "%.1f", s_smooth.get(0x11));
+    lv_arc_set_value(objects.arc_gpu_load_memory, s_smooth.getInt(0x11));
 }
 
 void displayRamDetails()
 {
-    lv_label_set_text_fmt(objects.label_ram_used, "%.1f GB", monitor.get(0x05));
-    lv_label_set_text_fmt(objects.label_ram_available, "%.1f GB", monitor.get(0x06));
-    lv_label_set_text_fmt(objects.label_ram_virtual_used, "%.1f GB", monitor.get(0x08));
-    lv_label_set_text_fmt(objects.label_ram_virtual_available, "%.1f GB", monitor.get(0x09));
-    lv_label_set_text_fmt(objects.label_ram_percentage_details, "%.1f", monitor.get(0x07));
-    lv_arc_set_value(objects.arc_ram_percentage_details, static_cast<int>(std::round(monitor.get(0x07))));
-    lv_label_set_text_fmt(objects.label_ram_percentage_virtual_details, "%.1f", monitor.get(0x0A));
-    lv_arc_set_value(objects.arc_ram_percentage_virtual_details, static_cast<int>(std::round(monitor.get(0x0A))));
+    lv_label_set_text_fmt(objects.label_ram_used, "%.1f", s_smooth.get(0x05));
+    lv_label_set_text_fmt(objects.label_ram_available, "%.1f", s_smooth.get(0x06));
+    lv_label_set_text_fmt(objects.label_ram_virtual_used, "%.1f", s_smooth.get(0x08));
+    lv_label_set_text_fmt(objects.label_ram_virtual_available, "%.1f", s_smooth.get(0x09));
+    lv_label_set_text_fmt(objects.label_ram_percentage_details, "%.1f", s_smooth.get(0x07));
+    lv_arc_set_value(objects.arc_ram_percentage_details, s_smooth.getInt(0x07));
+    lv_label_set_text_fmt(objects.label_ram_percentage_virtual_details, "%.1f", s_smooth.get(0x0A));
+    lv_arc_set_value(objects.arc_ram_percentage_virtual_details, s_smooth.getInt(0x0A));
 }
 
 void displayData()
@@ -330,21 +332,36 @@ void displayData()
     }
 }
 
+void updateSmoothTargets()
+{
+    s_smooth.setTarget(0x01, monitor.get(0x01));
+    s_smooth.setTarget(0x02, monitor.get(0x02));
+    s_smooth.setTarget(0x03, monitor.get(0x03));
+    s_smooth.setTarget(0x04, monitor.get(0x04));
+    s_smooth.setTarget(0x05, monitor.get(0x05));
+    s_smooth.setTarget(0x06, monitor.get(0x06));
+    s_smooth.setTarget(0x07, monitor.get(0x07));
+    s_smooth.setTarget(0x08, monitor.get(0x08));
+    s_smooth.setTarget(0x09, monitor.get(0x09));
+    s_smooth.setTarget(0x0A, monitor.get(0x0A));
+    s_smooth.setTarget(0x0B, monitor.get(0x0B));
+    s_smooth.setTarget(0x0C, monitor.get(0x0C));
+    s_smooth.setTarget(0x0D, monitor.get(0x0D));
+    s_smooth.setTarget(0x0E, monitor.get(0x0E));
+    s_smooth.setTarget(0x0F, monitor.get(0x0F));
+    s_smooth.setTarget(0x10, monitor.get(0x10));
+    s_smooth.setTarget(0x11, monitor.get(0x11));
+}
+float test = 0.0f;
 void loop()
 {
 
     if (monitor.update(Serial))
     {
-        displayData();
-        // String debug;
-        // for (size_t i = 0; i < 17; i++)
-        // {
-        //     debug += "0x" + String(monitor.getSensorByIndex(i)->id, HEX) + " ";
-        // }
-        int hot_spot = static_cast<int>(std::round(monitor.get(0x0E)));
-        lv_label_set_text_fmt(objects.test, "%d min: %d", hot_spot, hot_spot - 1);
+        updateSmoothTargets();
     }
 
+    s_smooth.updateAll();
     /* let the GUI do its work */
     static uint32_t lastTick = 0;
     uint32_t now = millis();
@@ -355,9 +372,13 @@ void loop()
     }
 
     ui_tick();
+    displayData();
     lv_timer_handler();
-
-    taskManager.runLoop();
-
-    delay(1);
+    // test += 0.1f;
+    // if (test > 100.0f)
+    //     test = 0.0f;
+    //      lv_label_set_text_fmt(objects.label_gpu_power, "%.1f", test);
+    // taskManager.runLoop();
+    lv_label_set_text_fmt(objects.test, "FPS: %.1f", s_smooth.get(0x04));
+    // delay(1);
 }

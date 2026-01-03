@@ -60,7 +60,7 @@ void create_screen_main() {
                         }
                         {
                             lv_obj_t *obj = lv_obj_create(parent_obj);
-                            objects.obj0 = obj;
+                            objects.obj1 = obj;
                             lv_obj_set_pos(obj, 117, 38);
                             lv_obj_set_size(obj, 181, 121);
                             lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -79,7 +79,7 @@ void create_screen_main() {
                         }
                         {
                             lv_obj_t *obj = lv_label_create(parent_obj);
-                            objects.obj1 = obj;
+                            objects.obj2 = obj;
                             lv_obj_set_pos(obj, 139, 28);
                             lv_obj_set_size(obj, 59, LV_SIZE_CONTENT);
                             lv_obj_set_style_shadow_width(obj, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -96,7 +96,7 @@ void create_screen_main() {
                         }
                         {
                             lv_obj_t *obj = lv_obj_create(parent_obj);
-                            objects.obj2 = obj;
+                            objects.obj3 = obj;
                             lv_obj_set_pos(obj, 127, 39);
                             lv_obj_set_size(obj, 81, 20);
                             lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -290,7 +290,7 @@ void create_screen_main() {
                                         lv_obj_t *parent_obj = obj;
                                         {
                                             lv_obj_t *obj = lv_label_create(parent_obj);
-                                            objects.obj3 = obj;
+                                            objects.obj4 = obj;
                                             lv_obj_set_pos(obj, 0, 0);
                                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                                             add_style_unit(obj);
@@ -535,7 +535,7 @@ void create_screen_main() {
                                         lv_obj_t *parent_obj = obj;
                                         {
                                             lv_obj_t *obj = lv_label_create(parent_obj);
-                                            objects.obj4 = obj;
+                                            objects.obj5 = obj;
                                             lv_obj_set_pos(obj, 0, 0);
                                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                                             lv_obj_set_style_text_color(obj, lv_color_hex(0xff636872), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -791,7 +791,7 @@ void create_screen_main() {
                 }
                 {
                     lv_obj_t *obj = lv_tabview_add_tab(parent_obj, "TIME");
-                    objects.obj5 = obj;
+                    objects.obj6 = obj;
                     lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW);
                     lv_obj_set_style_bg_color(obj, lv_color_hex(0xffffffff), LV_PART_MAIN | LV_STATE_DEFAULT);
                     {
@@ -817,9 +817,9 @@ void create_screen_main() {
                             lv_label_set_text(obj, "--");
                         }
                         {
-                            // lebel_minute
+                            // label_minute
                             lv_obj_t *obj = lv_label_create(parent_obj);
-                            objects.lebel_minute = obj;
+                            objects.label_minute = obj;
                             lv_obj_set_pos(obj, 243, 25);
                             lv_obj_set_size(obj, 221, 94);
                             lv_obj_set_style_text_color(obj, lv_color_hex(0xff9000ff), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -870,6 +870,19 @@ void create_screen_main() {
                             lv_obj_set_style_bg_color(obj, lv_color_hex(0xff00ffaa), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                         }
+                        {
+                            lv_obj_t *obj = lv_obj_create(parent_obj);
+                            objects.obj0 = obj;
+                            lv_obj_set_pos(obj, -16, -16);
+                            lv_obj_set_size(obj, 480, 268);
+                            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            create_user_widget_wifi_widget(obj, getFlowState(flowState, 85), 2);
+                        }
                     }
                 }
             }
@@ -882,6 +895,45 @@ void create_screen_main() {
 void tick_screen_main() {
     void *flowState = getFlowState(0, 0);
     (void)flowState;
+    tick_user_widget_wifi_widget(getFlowState(flowState, 85), 2);
+}
+
+void create_user_widget_wifi_widget(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex) {
+    (void)flowState;
+    (void)startWidgetIndex;
+    lv_obj_t *obj = parent_obj;
+    {
+        lv_obj_t *parent_obj = obj;
+        {
+            lv_obj_t *obj = lv_obj_create(parent_obj);
+            lv_obj_set_pos(obj, 420, 0);
+            lv_obj_set_size(obj, 60, 56);
+            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            {
+                lv_obj_t *parent_obj = obj;
+                {
+                    // wifi
+                    lv_obj_t *obj = lv_image_create(parent_obj);
+                    ((lv_obj_t **)&objects)[startWidgetIndex + 0] = obj;
+                    lv_obj_set_pos(obj, 32, 2);
+                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                    lv_image_set_src(obj, &img_no_wifi);
+                    lv_obj_add_flag(obj, LV_OBJ_FLAG_CLICKABLE);
+                }
+            }
+        }
+    }
+}
+
+void tick_user_widget_wifi_widget(void *flowState, int startWidgetIndex) {
+    (void)flowState;
+    (void)startWidgetIndex;
 }
 
 
@@ -889,7 +941,7 @@ extern void add_style(lv_obj_t *obj, int32_t styleIndex);
 extern void remove_style(lv_obj_t *obj, int32_t styleIndex);
 
 static const char *screen_names[] = { "Main" };
-static const char *object_names[] = { "main", "slider_brightness", "tabview", "test", "obj0", "obj1", "obj2", "bar_cpu_temperature", "arc_cpu_load_core_max", "arc_cpu_load_total", "label_cpu_load_core_max", "label_cpu_load_total", "label_cpu_power", "obj3", "label_cpu_temperature", "bar_gpu_temp_core", "bar_gpu_temp_hot_spot", "arc_gpu_load_memory", "arc_gpu_load_core", "label_gpu_load_memory", "label_gpu_load_core", "label_gpu_power", "label_gpu_framerate", "obj4", "label_gpu_temp_core", "arc_ram_percentage_virtual_details", "arc_ram_percentage_details", "label_ram_percentage_virtual_details", "label_ram_percentage_details", "label_ram_used", "label_ram_available", "label_ram_virtual_available", "label_ram_virtual_used", "obj5", "label_date", "label_second", "lebel_minute", "label_hour" };
+static const char *object_names[] = { "main", "obj0", "obj0__wifi", "slider_brightness", "tabview", "test", "obj1", "obj2", "obj3", "bar_cpu_temperature", "arc_cpu_load_core_max", "arc_cpu_load_total", "label_cpu_load_core_max", "label_cpu_load_total", "label_cpu_power", "obj4", "label_cpu_temperature", "bar_gpu_temp_core", "bar_gpu_temp_hot_spot", "arc_gpu_load_memory", "arc_gpu_load_core", "label_gpu_load_memory", "label_gpu_load_core", "label_gpu_power", "label_gpu_framerate", "obj5", "label_gpu_temp_core", "arc_ram_percentage_virtual_details", "arc_ram_percentage_details", "label_ram_percentage_virtual_details", "label_ram_percentage_details", "label_ram_used", "label_ram_available", "label_ram_virtual_available", "label_ram_virtual_used", "obj6", "label_date", "label_second", "label_minute", "label_hour" };
 static const char *style_names[] = { "secondary_arc", "main_arc", "temperature_bar", "unit", "testbtn" };
 
 

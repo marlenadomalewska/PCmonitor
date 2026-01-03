@@ -1,9 +1,14 @@
 {
   "navigation": {
     "selectedUserPageObject": "[monitorGUI.eez-project]:/userPages/0",
+    "selectedUserWidgetObject": "[monitorGUI.eez-project]:/userWidgets/0",
+    "selectedActionObject": "[monitorGUI.eez-project]:/actions/0",
+    "selectedStyleObject": "[monitorGUI.eez-project]:/lvglStyles/styles/4",
+    "selectedThemeColorObject": "[monitorGUI.eez-project]:/colors/0",
     "selectedFontObject": "[monitorGUI.eez-project]:/fonts/8",
+    "selectedBitmapObject": "[monitorGUI.eez-project]:/bitmaps/0",
     "subnavigationSelectedItems": {
-      "variables-tab/sub-navigation/selected-item": "Widgets"
+      "variables-tab/sub-navigation/selected-item": "Global"
     }
   },
   "layoutModel": {
@@ -24,6 +29,7 @@
           },
           {
             "type": "border",
+            "selected": 2,
             "size": 240,
             "location": "right",
             "children": [
@@ -87,7 +93,7 @@
           },
           {
             "type": "border",
-            "selected": 0,
+            "selected": 1,
             "size": 40.5,
             "location": "bottom",
             "children": [
@@ -140,7 +146,7 @@
                 {
                   "type": "tabset",
                   "id": "#5aa3f0d0-cfe7-4e56-a9a8-c2f380318c37",
-                  "weight": 1,
+                  "weight": 0.4043408774552765,
                   "enableClose": false,
                   "children": [
                     {
@@ -172,7 +178,7 @@
                 {
                   "type": "tabset",
                   "id": "#c745120f-7d46-465a-8249-caa5ae70de44",
-                  "weight": 1.187116564417178,
+                  "weight": 1.0141274408805605,
                   "enableClose": false,
                   "children": [
                     {
@@ -188,7 +194,7 @@
                 {
                   "type": "tabset",
                   "id": "#be97134c-9598-4d7c-8999-178195d25f8c",
-                  "weight": 0.3128834355828221,
+                  "weight": 1.0815316816641627,
                   "children": [
                     {
                       "type": "tab",
@@ -205,10 +211,22 @@
             {
               "type": "tabset",
               "id": "EDITORS",
-              "weight": 42.98411134502293,
+              "weight": 49.63343855888779,
+              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
+                {
+                  "type": "tab",
+                  "id": "#01127d1b-54f8-4d8f-8a8e-b745a1a2590d",
+                  "name": "wifi_widget",
+                  "component": "editor",
+                  "config": {
+                    "objectPath": "[monitorGUI.eez-project]:/userWidgets/0",
+                    "permanent": false
+                  },
+                  "icon": "svg:user_widget"
+                },
                 {
                   "type": "tab",
                   "id": "#8a492a9c-b8a8-4762-94ce-d90079a47254",
@@ -226,7 +244,7 @@
             {
               "type": "tabset",
               "id": "#a5775a3c-8cac-4953-a138-6c4efb44b9a9",
-              "weight": 36.56369977703216,
+              "weight": 29.9143725631673,
               "children": [
                 {
                   "type": "tab",
@@ -529,7 +547,8 @@
                       "component": "bitmaps",
                       "enableClose": false
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -757,7 +776,8 @@
                       "component": "styles",
                       "enableClose": false
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -831,7 +851,8 @@
                       "component": "colors",
                       "enableClose": false
                     }
-                  ]
+                  ],
+                  "active": true
                 }
               ]
             }
@@ -992,21 +1013,21 @@
       "selection": {
         "0": {
           "0": {
-            "0": {
-              "1": {},
-              "2": {},
-              "3": {}
-            },
-            "$selected": true
+            "2": {},
+            "4": {
+              "6": {
+                "$selected": true
+              }
+            }
           }
         }
       },
       "transform": {
         "translate": {
-          "x": -176.82164502164505,
-          "y": -314.72424242424233
+          "x": -304,
+          "y": -310
         },
-        "scale": 2
+        "scale": 1.25
       },
       "timeline": {
         "isEditorActive": false,
@@ -1018,7 +1039,9 @@
     "[monitorGUI.eez-project]:/userWidgets/0[flow-state]": {
       "selection": {
         "0": {
-          "3": {}
+          "0": {
+            "$selected": true
+          }
         }
       },
       "transform": {
@@ -1026,7 +1049,7 @@
           "x": -155.76666666666665,
           "y": -114.59393939393931
         },
-        "scale": 1.1
+        "scale": 1.25
       },
       "timeline": {
         "isEditorActive": false,
@@ -1061,6 +1084,33 @@
         "secondToPx": 200,
         "scrollLeft": 0
       }
+    },
+    "[monitorGUI.eez-project]:/lvglStyles/styles[tree-state]": {
+      "0": {
+        "$selected": true
+      },
+      "1": {
+        "$selected": true
+      },
+      "2": {
+        "$selected": true
+      },
+      "3": {
+        "$selected": true
+      },
+      "4": {
+        "$selected": true
+      }
+    },
+    "[monitorGUI.eez-project]:/actions/0[flow-state]": {
+      "selection": {},
+      "transform": {
+        "translate": {
+          "x": 0,
+          "y": 0
+        },
+        "scale": 1
+      }
     }
   },
   "activeOutputSection": 0,
@@ -1075,8 +1125,8 @@
   "showComponentDescriptions": true,
   "logsPanelFilter": "all",
   "selectedStylePropertyName": "",
-  "lvglPart": "MAIN",
-  "lvglState": "FOCUSED",
+  "lvglPart": "INDICATOR",
+  "lvglState": "DEFAULT",
   "lvglExpandedPropertiesGroup": [
     "ARC",
     "SHADOW",
@@ -1087,10 +1137,11 @@
     "LINE",
     "IMAGE",
     "OUTLINE",
-    "BORDER"
+    "BORDER",
+    "BACKGROUND"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 2,
+  "flowZoom": 1.25,
   "implementationLanguage": "C"
 }

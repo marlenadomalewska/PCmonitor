@@ -35,9 +35,11 @@
 #include <Arduino.h>
 #include <lvgl.h>
 #include <LovyanGFX.hpp>
+#include <ESP32Time.h>
 #include "driver/uart.h"
 #include "SmoothValue.h"
 #include <eez-framework.h>
+#include <WiFi.h>
 #include "TaskManagerIO.h"
 #include "ui/ui.h"
 #include "ui/screens.h"
@@ -45,6 +47,7 @@
 #include "ui/images.h"
 #include "HWMonitor/HwMonitor.h"
 #include "SensorIndexes.h"
+#include "secret/secrets.h"
 
 #define SCR 32
 class LGFX : public lgfx::LGFX_Device
@@ -221,60 +224,6 @@ void my_touchpad_read(lv_indev_t *dev, lv_indev_data_t *data)
         data->point.y = touchY;
     }
 }
-
-void setup()
-{
-    Serial.setRxBufferSize(4096);
-    Serial.begin(115200);
-    tft.init();
-    tft.initDMA();
-    tft.startWrite();
-    tft.setBrightness(80);
-
-    lv_init();
-
-    Serial.printf("\nWidth %d\tHeight %d\n", screenWidth, screenHeight);
-
-    if (!disp_draw_buf)
-    {
-        Serial.println("LVGL disp_draw_buf allocate failed!");
-    }
-    else
-    {
-        static auto *lvDisplay = lv_display_create(screenWidth, screenHeight);
-        lv_display_set_color_format(lvDisplay, LV_COLOR_FORMAT_RGB565);
-        lv_display_set_flush_cb(lvDisplay, my_disp_flush);
-
-        lv_display_set_buffers(lvDisplay, lvBuffer[0], lvBuffer[1], lvBufferSize, LV_DISPLAY_RENDER_MODE_PARTIAL);
-
-        static auto *lvInput = lv_indev_create();
-        lv_indev_set_type(lvInput, LV_INDEV_TYPE_POINTER);
-        lv_indev_set_read_cb(lvInput, my_touchpad_read);
-
-        ui_init();
-
-        monitor.begin();
-
-        Serial.println("Setup done");
-    }
-}
-
-void uart_espnow_init(void)
-{
-    const uart_config_t uart_config = {
-        .baud_rate = UART_BAUD_RATE,
-        .data_bits = UART_DATA_8_BITS,
-        .parity = UART_PARITY_DISABLE,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
-
-    uart_driver_install(UART_PORT, BUF_SIZE * 2, 0, 0, NULL, 0);
-    uart_param_config(UART_PORT, &uart_config);
-    uart_set_pin(UART_PORT, UART_TX_PIN, UART_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-
-    ESP_LOGI(TAG, "UART initialized (TX=%d RX=%d @ %d baud)", UART_TX_PIN, UART_RX_PIN, UART_BAUD_RATE);
-}
-
 void displayCpuDetails()
 {
     lv_label_set_text_fmt(objects.label_cpu_temperature, "%.1f", s_smooth.get(CPU_TEMPERATURE_CORE));
@@ -312,6 +261,32 @@ void displayRamDetails()
     lv_label_set_text_fmt(objects.label_ram_percentage_virtual_details, "%.1f", s_smooth.get(RAM_LOAD_VIRTUAL_MEMORY));
     lv_arc_set_value(objects.arc_ram_percentage_virtual_details, s_smooth.getInt(RAM_LOAD_VIRTUAL_MEMORY));
 }
+void updateRTC()
+{
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        Serial.println("Updating RTC with NTP server...");
+        configTzTime(timeOffset, ntpServer);
+    }
+}
+
+void displayTime()
+{
+    const lv_img_dsc_t *expectedImg = (WiFi.status() == WL_CONNECTED) ? &img_wifi : &img_no_wifi;
+    lv_image_set_src(objects.obj0__wifi, expectedImg);
+    if (WiFi.status() != WL_CONNECTED)
+        return;
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo))
+    {
+        Serial.println("Failed to obtain time");
+        updateRTC();
+    }
+    lv_label_set_text_fmt(objects.label_hour, "%02d", timeinfo.tm_hour);
+    lv_label_set_text_fmt(objects.label_minute, "%02d", timeinfo.tm_min);
+    lv_label_set_text_fmt(objects.label_second, "%02d", timeinfo.tm_sec);
+    lv_label_set_text_fmt(objects.label_date, "%02d-%02d-%04d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
+}
 
 void displayData()
 {
@@ -332,6 +307,43 @@ void displayData()
     {
         displayRamDetails();
     }
+    else if (active_index == Tabs::TIME)
+    {
+        displayTime();
+    }
+}
+
+void uart_espnow_init(void)
+{
+    const uart_config_t uart_config = {
+        .baud_rate = UART_BAUD_RATE,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
+
+    uart_driver_install(UART_PORT, BUF_SIZE * 2, 0, 0, NULL, 0);
+    uart_param_config(UART_PORT, &uart_config);
+    uart_set_pin(UART_PORT, UART_TX_PIN, UART_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+
+    ESP_LOGI(TAG, "UART initialized (TX=%d RX=%d @ %d baud)", UART_TX_PIN, UART_RX_PIN, UART_BAUD_RATE);
+}
+
+void setupWifi(void *arg)
+{
+    Serial.print("Connecting to ");
+    Serial.println(ssid);
+    WiFi.disconnect(true);
+    WiFi.begin(ssid, password);
+
+    while (1)
+    {
+        while (WiFi.status() != WL_CONNECTED)
+        {
+            delay(500);
+            Serial.print(".");
+        }
+    }
 }
 
 void action_set_brightness(lv_event_t *e)
@@ -343,6 +355,45 @@ void updateSmoothTargets()
 {
     for (Indexes index : ALL_INDEXES)
         s_smooth.setTarget(index, monitor.get(index));
+}
+
+void setup()
+{
+    Serial.setRxBufferSize(4096);
+    Serial.begin(115200);
+    tft.init();
+    tft.initDMA();
+    tft.startWrite();
+    tft.setBrightness(80);
+
+    lv_init();
+
+    Serial.printf("\nWidth %d\tHeight %d\n", screenWidth, screenHeight);
+
+    if (!disp_draw_buf)
+    {
+        Serial.println("LVGL disp_draw_buf allocate failed!");
+    }
+    else
+    {
+        static auto *lvDisplay = lv_display_create(screenWidth, screenHeight);
+        lv_display_set_color_format(lvDisplay, LV_COLOR_FORMAT_RGB565);
+        lv_display_set_flush_cb(lvDisplay, my_disp_flush);
+
+        lv_display_set_buffers(lvDisplay, lvBuffer[0], lvBuffer[1], lvBufferSize, LV_DISPLAY_RENDER_MODE_PARTIAL);
+
+        static auto *lvInput = lv_indev_create();
+        lv_indev_set_type(lvInput, LV_INDEV_TYPE_POINTER);
+        lv_indev_set_read_cb(lvInput, my_touchpad_read);
+
+        ui_init();
+
+        monitor.begin();
+
+        Serial.println("Setup done");
+    }
+    xTaskCreate(setupWifi, "setupWifi", 4096, NULL, 1, NULL);
+    taskManager.schedule(repeatSeconds(60), updateRTC);
 }
 
 void loop()
@@ -366,7 +417,6 @@ void loop()
     ui_tick();
     displayData();
     lv_timer_handler();
-    // taskManager.runLoop();
+    taskManager.runLoop();
     lv_label_set_text_fmt(objects.test, "FPS: %.1f", s_smooth.get(0x04));
-    // delay(1);
 }

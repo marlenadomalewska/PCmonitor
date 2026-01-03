@@ -44,7 +44,7 @@
 #include "ui/actions.h"
 #include "ui/images.h"
 #include "HWMonitor/HwMonitor.h"
-#include "ui/styles.h"
+#include "SensorIndexes.h"
 
 #define SCR 32
 class LGFX : public lgfx::LGFX_Device
@@ -178,7 +178,8 @@ enum Tabs
     ALL,
     CPU,
     GPU,
-    RAM
+    RAM,
+    TIME
 };
 
 /* Display flushing */
@@ -276,40 +277,40 @@ void uart_espnow_init(void)
 
 void displayCpuDetails()
 {
-    lv_label_set_text_fmt(objects.label_cpu_temperature, "%.1f", s_smooth.get(0x04));
-    lv_bar_set_value(objects.bar_cpu_temperature, s_smooth.get(0x04), LV_ANIM_OFF);
-    lv_label_set_text_fmt(objects.label_cpu_load_core_max, "%.1f", s_smooth.get(0x02));
-    lv_label_set_text_fmt(objects.label_cpu_load_total, "%.1f", s_smooth.get(0x01));
-    lv_label_set_text_fmt(objects.label_cpu_power, "%.1f", s_smooth.get(0x03));
-    lv_arc_set_value(objects.arc_cpu_load_core_max, s_smooth.getInt(0x02));
-    lv_arc_set_value(objects.arc_cpu_load_total, s_smooth.getInt(0x01));
+    lv_label_set_text_fmt(objects.label_cpu_temperature, "%.1f", s_smooth.get(CPU_TEMPERATURE_CORE));
+    lv_bar_set_value(objects.bar_cpu_temperature, s_smooth.get(CPU_TEMPERATURE_CORE), LV_ANIM_OFF);
+    lv_label_set_text_fmt(objects.label_cpu_load_core_max, "%.1f", s_smooth.get(CPU_LOAD_CORE_MAX));
+    lv_label_set_text_fmt(objects.label_cpu_load_total, "%.1f", s_smooth.get(CPU_LOAD_TOTAL));
+    lv_label_set_text_fmt(objects.label_cpu_power, "%.1f", s_smooth.get(CPU_PACKAGE));
+    lv_arc_set_value(objects.arc_cpu_load_core_max, s_smooth.getInt(CPU_LOAD_CORE_MAX));
+    lv_arc_set_value(objects.arc_cpu_load_total, s_smooth.getInt(CPU_LOAD_TOTAL));
 }
 
 void displayGpuDetails()
 {
-    uint8_t hot_spot = s_smooth.getInt(0x0E);
+    uint8_t hot_spot = s_smooth.getInt(GPU_TEMPERATURE_HOT_SPOT);
     lv_bar_set_value(objects.bar_gpu_temp_hot_spot, hot_spot, LV_ANIM_OFF);
     lv_bar_set_start_value(objects.bar_gpu_temp_hot_spot, hot_spot - 3, LV_ANIM_OFF);
-    lv_bar_set_value(objects.bar_gpu_temp_core, s_smooth.getInt(0x0D), LV_ANIM_OFF);
-    lv_label_set_text_fmt(objects.label_gpu_temp_core, "%.1f", s_smooth.get(0x0D));
-    lv_label_set_text_fmt(objects.label_gpu_framerate, "%d", s_smooth.getInt(0x0B) > 1000 ? 1000 : s_smooth.getInt(0x0B));
-    lv_label_set_text_fmt(objects.label_gpu_power, "%.1f", s_smooth.get(0x0C));
-    lv_label_set_text_fmt(objects.label_gpu_load_core, "%.1f", s_smooth.get(0x10));
-    lv_arc_set_value(objects.arc_gpu_load_core, s_smooth.getInt(0x10));
-    lv_label_set_text_fmt(objects.label_gpu_load_memory, "%.1f", s_smooth.get(0x11));
-    lv_arc_set_value(objects.arc_gpu_load_memory, s_smooth.getInt(0x11));
+    lv_bar_set_value(objects.bar_gpu_temp_core, s_smooth.getInt(GPU_TEMPERATURE_CORE), LV_ANIM_OFF);
+    lv_label_set_text_fmt(objects.label_gpu_temp_core, "%.1f", s_smooth.get(GPU_TEMPERATURE_CORE));
+    lv_label_set_text_fmt(objects.label_gpu_framerate, "%d", s_smooth.getInt(GPU_FRAMERATE) > 1000 ? 1000 : s_smooth.getInt(GPU_FRAMERATE));
+    lv_label_set_text_fmt(objects.label_gpu_power, "%.1f", s_smooth.get(GPU_PACKAGE));
+    lv_label_set_text_fmt(objects.label_gpu_load_core, "%.1f", s_smooth.get(GPU_LOAD_CORE));
+    lv_arc_set_value(objects.arc_gpu_load_core, s_smooth.getInt(GPU_LOAD_CORE));
+    lv_label_set_text_fmt(objects.label_gpu_load_memory, "%.1f", s_smooth.get(GPU_LOAD_MEMORY));
+    lv_arc_set_value(objects.arc_gpu_load_memory, s_smooth.getInt(GPU_LOAD_MEMORY));
 }
 
 void displayRamDetails()
 {
-    lv_label_set_text_fmt(objects.label_ram_used, "%.1f", s_smooth.get(0x05));
-    lv_label_set_text_fmt(objects.label_ram_available, "%.1f", s_smooth.get(0x06));
-    lv_label_set_text_fmt(objects.label_ram_virtual_used, "%.1f", s_smooth.get(0x08));
-    lv_label_set_text_fmt(objects.label_ram_virtual_available, "%.1f", s_smooth.get(0x09));
-    lv_label_set_text_fmt(objects.label_ram_percentage_details, "%.1f", s_smooth.get(0x07));
-    lv_arc_set_value(objects.arc_ram_percentage_details, s_smooth.getInt(0x07));
-    lv_label_set_text_fmt(objects.label_ram_percentage_virtual_details, "%.1f", s_smooth.get(0x0A));
-    lv_arc_set_value(objects.arc_ram_percentage_virtual_details, s_smooth.getInt(0x0A));
+    lv_label_set_text_fmt(objects.label_ram_used, "%.1f", s_smooth.get(RAM_USED));
+    lv_label_set_text_fmt(objects.label_ram_available, "%.1f", s_smooth.get(RAM_AVAILABLE));
+    lv_label_set_text_fmt(objects.label_ram_virtual_used, "%.1f", s_smooth.get(RAM_VIRTUAL_USED));
+    lv_label_set_text_fmt(objects.label_ram_virtual_available, "%.1f", s_smooth.get(RAM_VIRTUAL_AVAILABLE));
+    lv_label_set_text_fmt(objects.label_ram_percentage_details, "%.1f", s_smooth.get(RAM_LOAD_MEMORY));
+    lv_arc_set_value(objects.arc_ram_percentage_details, s_smooth.getInt(RAM_LOAD_MEMORY));
+    lv_label_set_text_fmt(objects.label_ram_percentage_virtual_details, "%.1f", s_smooth.get(RAM_LOAD_VIRTUAL_MEMORY));
+    lv_arc_set_value(objects.arc_ram_percentage_virtual_details, s_smooth.getInt(RAM_LOAD_VIRTUAL_MEMORY));
 }
 
 void displayData()
@@ -333,27 +334,17 @@ void displayData()
     }
 }
 
+void action_set_brightness(lv_event_t *e)
+{
+    tft.setBrightness(lv_slider_get_value(objects.slider_brightness));
+}
+
 void updateSmoothTargets()
 {
-    s_smooth.setTarget(0x01, monitor.get(0x01));
-    s_smooth.setTarget(0x02, monitor.get(0x02));
-    s_smooth.setTarget(0x03, monitor.get(0x03));
-    s_smooth.setTarget(0x04, monitor.get(0x04));
-    s_smooth.setTarget(0x05, monitor.get(0x05));
-    s_smooth.setTarget(0x06, monitor.get(0x06));
-    s_smooth.setTarget(0x07, monitor.get(0x07));
-    s_smooth.setTarget(0x08, monitor.get(0x08));
-    s_smooth.setTarget(0x09, monitor.get(0x09));
-    s_smooth.setTarget(0x0A, monitor.get(0x0A));
-    s_smooth.setTarget(0x0B, monitor.get(0x0B));
-    s_smooth.setTarget(0x0C, monitor.get(0x0C));
-    s_smooth.setTarget(0x0D, monitor.get(0x0D));
-    s_smooth.setTarget(0x0E, monitor.get(0x0E));
-    s_smooth.setTarget(0x0F, monitor.get(0x0F));
-    s_smooth.setTarget(0x10, monitor.get(0x10));
-    s_smooth.setTarget(0x11, monitor.get(0x11));
+    for (Indexes index : ALL_INDEXES)
+        s_smooth.setTarget(index, monitor.get(index));
 }
-float test = 0.0f;
+
 void loop()
 {
 
@@ -375,10 +366,6 @@ void loop()
     ui_tick();
     displayData();
     lv_timer_handler();
-    // test += 0.1f;
-    // if (test > 100.0f)
-    //     test = 0.0f;
-    //      lv_label_set_text_fmt(objects.label_gpu_power, "%.1f", test);
     // taskManager.runLoop();
     lv_label_set_text_fmt(objects.test, "FPS: %.1f", s_smooth.get(0x04));
     // delay(1);

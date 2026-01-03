@@ -1,6 +1,7 @@
 /**
  * @file HWMonitor. cpp
  * @brief Hardware Monitor Protocol Parser Implementation
+ * @version 2.0 - 16-bit sensor IDs
  */
 
 #include "HWMonitor.h"
@@ -10,7 +11,7 @@
 /*===========================================================================*/
 
 HWMonitor::HWMonitor()
-    : packetsOK(0), packetsError(0), sensorCount(0), lastUpdate(0), _state(HW_STATE_IDLE), _expectedCount(0), _currentSensor(0), _byteInSensor(0), _tempId(0), _crcLow(0), _crcHigh(0), _packetCallback(nullptr), _sensorCallback(nullptr)
+    : packetsOK(0), packetsError(0), sensorCount(0), lastUpdate(0), _state(HW_STATE_IDLE), _expectedCount(0), _currentSensor(0), _byteInValue(0), _tempId(0), _tempIdHigh(0), _crcLow(0), _crcHigh(0), _packetCallback(nullptr), _sensorCallback(nullptr)
 {
 }
 
@@ -30,10 +31,27 @@ void HWMonitor::reset()
     }
 
     _state = HW_STATE_IDLE;
+    _expectedCount = 0;
+    _currentSensor = 0;
+    _byteInValue = 0;
+    _tempId = 0;
+    _tempIdHigh = 0;
     sensorCount = 0;
     packetsOK = 0;
     packetsError = 0;
     lastUpdate = 0;
+}
+
+/*===========================================================================*/
+/*  RESERVED ID CHECK                                                        */
+/*===========================================================================*/
+
+bool HWMonitor::isReservedId(uint16_t id)
+{
+    uint8_t high = (uint8_t)(id >> 8);
+    uint8_t low = (uint8_t)(id & 0xFF);
+    return high == HW_RESERVED_START || high == HW_RESERVED_END ||
+           low == HW_RESERVED_START || low == HW_RESERVED_END;
 }
 
 /*===========================================================================*/
@@ -56,7 +74,7 @@ bool HWMonitor::update(Stream &stream)
 }
 
 /*===========================================================================*/
-/*  BYTE-BY-BYTE PARSER                                                      */
+/*  BYTE-BY-BYTE PARSER (Protocol v2 - 16-bit IDs)                           */
 /*===========================================================================*/
 
 bool HWMonitor::processByte(uint8_t byte)
@@ -77,6 +95,7 @@ bool HWMonitor::processByte(uint8_t byte)
         }
         else
         {
+            // Wrong version - could be old protocol or error
             _state = HW_STATE_IDLE;
             packetsError++;
         }
@@ -85,11 +104,11 @@ bool HWMonitor::processByte(uint8_t byte)
     case HW_STATE_COUNT:
         _expectedCount = byte;
         _currentSensor = 0;
-        _byteInSensor = 0;
+        _byteInValue = 0;
 
         if (byte > 0 && byte <= HW_MAX_SENSORS)
         {
-            _state = HW_STATE_DATA;
+            _state = HW_STATE_ID_HIGH;
         }
         else
         {
@@ -98,27 +117,40 @@ bool HWMonitor::processByte(uint8_t byte)
         }
         break;
 
-    case HW_STATE_DATA:
-        if (_byteInSensor == 0)
-        {
-            _tempId = byte;
-            _byteInSensor = 1;
-        }
-        else
-        {
-            _tempValue[_byteInSensor - 1] = byte;
-            _byteInSensor++;
+    case HW_STATE_ID_HIGH:
+        // First byte of 16-bit sensor ID (high byte)
+        _tempIdHigh = byte;
+        _state = HW_STATE_ID_LOW;
+        break;
 
-            if (_byteInSensor == 5)
+    case HW_STATE_ID_LOW:
+        // Second byte of 16-bit sensor ID (low byte)
+        _tempId = ((uint16_t)_tempIdHigh << 8) | byte;
+        _byteInValue = 0;
+        _state = HW_STATE_VALUE;
+        break;
+
+    case HW_STATE_VALUE:
+        // Reading 4-byte float value (little-endian)
+        _tempValue[_byteInValue] = byte;
+        _byteInValue++;
+
+        if (_byteInValue >= 4)
+        {
+            // Complete sensor data received
+            _storeSensor();
+            _currentSensor++;
+            _byteInValue = 0;
+
+            if (_currentSensor >= _expectedCount)
             {
-                _storeSensor();
-                _currentSensor++;
-                _byteInSensor = 0;
-
-                if (_currentSensor >= _expectedCount)
-                {
-                    _state = HW_STATE_CRC_LOW;
-                }
+                // All sensors received, expect CRC
+                _state = HW_STATE_CRC_LOW;
+            }
+            else
+            {
+                // More sensors to read
+                _state = HW_STATE_ID_HIGH;
             }
         }
         break;
@@ -155,6 +187,12 @@ void HWMonitor::_storeSensor()
     if (_currentSensor >= HW_MAX_SENSORS)
         return;
 
+    // Skip sensors with reserved IDs
+    if (isReservedId(_tempId))
+    {
+        return;
+    }
+
     // Convert bytes to float (little-endian)
     union
     {
@@ -181,7 +219,7 @@ void HWMonitor::_storeSensor()
 
 bool HWMonitor::_finalizePacket()
 {
-    sensorCount = _expectedCount;
+    sensorCount = _currentSensor; // Actual count (may differ if reserved IDs skipped)
     lastUpdate = millis();
     packetsOK++;
 
@@ -226,7 +264,8 @@ bool HWMonitor::parse(const uint8_t *data, size_t len)
     }
 
     uint8_t count = pkt[2];
-    size_t expectedLen = 3 + (count * 5) + 3;
+    // Protocol v2: 6 bytes per sensor (2 ID + 4 value)
+    size_t expectedLen = 3 + (count * HW_SENSOR_DATA_SIZE) + 3;
 
     if (remaining < expectedLen)
     {
@@ -242,9 +281,19 @@ bool HWMonitor::parse(const uint8_t *data, size_t len)
 
     // Parse sensor data
     size_t offset = 3;
-    for (uint8_t i = 0; i < count && i < HW_MAX_SENSORS; i++)
+    uint8_t validSensors = 0;
+
+    for (uint8_t i = 0; i < count && validSensors < HW_MAX_SENSORS; i++)
     {
-        _sensors[i].id = pkt[offset];
+        // Read 16-bit ID (big-endian in packet)
+        uint16_t id = ((uint16_t)pkt[offset] << 8) | pkt[offset + 1];
+
+        // Skip reserved IDs
+        if (isReservedId(id))
+        {
+            offset += HW_SENSOR_DATA_SIZE;
+            continue;
+        }
 
         union
         {
@@ -252,24 +301,26 @@ bool HWMonitor::parse(const uint8_t *data, size_t len)
             uint8_t b[4];
         } converter;
 
-        converter.b[0] = pkt[offset + 1];
-        converter.b[1] = pkt[offset + 2];
-        converter.b[2] = pkt[offset + 3];
-        converter.b[3] = pkt[offset + 4];
+        converter.b[0] = pkt[offset + 2];
+        converter.b[1] = pkt[offset + 3];
+        converter.b[2] = pkt[offset + 4];
+        converter.b[3] = pkt[offset + 5];
 
-        _sensors[i].value = converter.f;
-        _sensors[i].valid = true;
-        _sensors[i].timestamp = millis();
+        _sensors[validSensors].id = id;
+        _sensors[validSensors].value = converter.f;
+        _sensors[validSensors].valid = true;
+        _sensors[validSensors].timestamp = millis();
 
         if (_sensorCallback)
         {
-            _sensorCallback(_sensors[i].id, converter.f);
+            _sensorCallback(id, converter.f);
         }
 
-        offset += 5;
+        validSensors++;
+        offset += HW_SENSOR_DATA_SIZE;
     }
 
-    sensorCount = count;
+    sensorCount = validSensors;
     lastUpdate = millis();
     packetsOK++;
 
@@ -285,7 +336,7 @@ bool HWMonitor::parse(const uint8_t *data, size_t len)
 /*  DATA ACCESS                                                              */
 /*===========================================================================*/
 
-float HWMonitor::get(uint8_t id, float defaultValue) const
+float HWMonitor::get(uint16_t id, float defaultValue) const
 {
     for (uint8_t i = 0; i < sensorCount; i++)
     {
@@ -297,7 +348,7 @@ float HWMonitor::get(uint8_t id, float defaultValue) const
     return defaultValue;
 }
 
-bool HWMonitor::isValid(uint8_t id) const
+bool HWMonitor::isValid(uint16_t id) const
 {
     for (uint8_t i = 0; i < sensorCount; i++)
     {
@@ -318,7 +369,7 @@ const HWSensor *HWMonitor::getSensorByIndex(uint8_t index) const
     return nullptr;
 }
 
-const HWSensor *HWMonitor::findSensor(uint8_t id) const
+const HWSensor *HWMonitor::findSensor(uint16_t id) const
 {
     for (uint8_t i = 0; i < sensorCount; i++)
     {
@@ -393,7 +444,7 @@ uint16_t HWMonitor::_calculateCRC(const uint8_t *data, size_t len) const
 /*  UTILITY FUNCTIONS                                                        */
 /*===========================================================================*/
 
-const char *hwGetSensorName(uint8_t id)
+const char *hwGetSensorName(uint16_t id)
 {
     switch (id)
     {
@@ -472,6 +523,8 @@ const char *hwGetSensorName(uint8_t id)
         return "System Fan 2";
     case SENSOR_MB_FAN3:
         return "System Fan 3";
+    case SENSOR_MB_FAN4:
+        return "System Fan 4";
     case SENSOR_MB_VOLTAGE:
         return "System Voltage";
 
@@ -488,7 +541,7 @@ const char *hwGetSensorName(uint8_t id)
     }
 }
 
-const char *hwGetSensorUnit(uint8_t id)
+const char *hwGetSensorUnit(uint16_t id)
 {
     switch (id)
     {
@@ -538,6 +591,7 @@ const char *hwGetSensorUnit(uint8_t id)
     case SENSOR_MB_FAN1:
     case SENSOR_MB_FAN2:
     case SENSOR_MB_FAN3:
+    case SENSOR_MB_FAN4:
         return "RPM";
 
     // Data sizes
@@ -557,23 +611,27 @@ const char *hwGetSensorUnit(uint8_t id)
     }
 }
 
-const char *hwGetSensorCategory(uint8_t id)
+const char *hwGetSensorCategory(uint16_t id)
 {
-    if (id >= 0x01 && id <= 0x0F)
+    // Extract category from high nibble of low byte (for standard IDs)
+    // or check ranges for 16-bit IDs
+
+    if (id >= 0x0001 && id <= 0x000F)
         return "CPU";
-    if (id >= 0x10 && id <= 0x1F)
+    if (id >= 0x0010 && id <= 0x001F)
         return "GPU";
-    if (id >= 0x20 && id <= 0x2F)
+    if (id >= 0x0020 && id <= 0x002F)
         return "RAM";
-    if (id >= 0x30 && id <= 0x3F)
+    if (id >= 0x0030 && id <= 0x003F)
         return "Disk";
-    if (id >= 0x40 && id <= 0x4F)
+    if (id >= 0x0040 && id <= 0x004F)
         return "Network";
-    if (id >= 0x50 && id <= 0x5F)
+    if (id >= 0x0050 && id <= 0x005F)
         return "Motherboard";
-    if (id >= 0x60 && id <= 0x6F)
+    if (id >= 0x0060 && id <= 0x006F)
         return "Battery";
-    if (id >= 0x80 && id <= 0xFE)
+    if (id >= 0x0080 && id <= 0xFFFD)
         return "Custom";
+
     return "Unknown";
 }

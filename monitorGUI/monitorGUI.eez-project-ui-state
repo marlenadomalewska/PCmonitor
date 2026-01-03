@@ -205,13 +205,13 @@
             {
               "type": "tabset",
               "id": "EDITORS",
-              "weight": 57.02192361791208,
+              "weight": 42.98411134502293,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
                 {
                   "type": "tab",
-                  "id": "#9fb0ba4b-4cba-4901-b08c-adfb5b86bc82",
+                  "id": "#8a492a9c-b8a8-4762-94ce-d90079a47254",
                   "name": "Main",
                   "component": "editor",
                   "config": {
@@ -220,12 +220,13 @@
                   },
                   "icon": "svg:page"
                 }
-              ]
+              ],
+              "active": true
             },
             {
               "type": "tabset",
               "id": "#a5775a3c-8cac-4953-a138-6c4efb44b9a9",
-              "weight": 22.52588750414303,
+              "weight": 36.56369977703216,
               "children": [
                 {
                   "type": "tab",
@@ -235,8 +236,7 @@
                   "enableClose": false,
                   "icon": "svg:properties"
                 }
-              ],
-              "active": true
+              ]
             }
           ]
         }
@@ -992,22 +992,21 @@
       "selection": {
         "0": {
           "0": {
-            "2": {
-              "0": {
-                "$selected": true
-              },
+            "0": {
               "1": {},
-              "2": {}
-            }
+              "2": {},
+              "3": {}
+            },
+            "$selected": true
           }
         }
       },
       "transform": {
         "translate": {
-          "x": -410.5593308080804,
-          "y": -277.2685606060606
+          "x": -176.82164502164505,
+          "y": -314.72424242424233
         },
-        "scale": 1.75
+        "scale": 2
       },
       "timeline": {
         "isEditorActive": false,
@@ -1076,8 +1075,8 @@
   "showComponentDescriptions": true,
   "logsPanelFilter": "all",
   "selectedStylePropertyName": "",
-  "lvglPart": "INDICATOR",
-  "lvglState": "DEFAULT",
+  "lvglPart": "MAIN",
+  "lvglState": "FOCUSED",
   "lvglExpandedPropertiesGroup": [
     "ARC",
     "SHADOW",
@@ -1088,11 +1087,10 @@
     "LINE",
     "IMAGE",
     "OUTLINE",
-    "BORDER",
-    "BACKGROUND"
+    "BORDER"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 1.75,
+  "flowZoom": 2,
   "implementationLanguage": "C"
 }

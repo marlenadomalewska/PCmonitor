@@ -44,6 +44,7 @@
 #include "ui/actions.h"
 #include "ui/images.h"
 #include "HWMonitor/HwMonitor.h"
+#include "ui/styles.h"
 
 #define SCR 32
 class LGFX : public lgfx::LGFX_Device
@@ -227,7 +228,7 @@ void setup()
     tft.init();
     tft.initDMA();
     tft.startWrite();
-    tft.setBrightness(255);
+    tft.setBrightness(80);
 
     lv_init();
 

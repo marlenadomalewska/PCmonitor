@@ -27,6 +27,11 @@ lv_style_t *get_style_temperature_bar_INDICATOR_DEFAULT();
 void add_style_temperature_bar(lv_obj_t *obj);
 void remove_style_temperature_bar(lv_obj_t *obj);
 
+// Style: unit
+lv_style_t *get_style_unit_MAIN_DEFAULT();
+void add_style_unit(lv_obj_t *obj);
+void remove_style_unit(lv_obj_t *obj);
+
 
 
 #ifdef __cplusplus

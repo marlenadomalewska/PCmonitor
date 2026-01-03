@@ -178,7 +178,6 @@ static SmoothValueManager<32> s_smooth(0.05f);
 
 enum Tabs
 {
-    ALL,
     CPU,
     GPU,
     RAM,
@@ -292,10 +291,7 @@ void displayData()
 {
 
     uint8_t active_index = lv_tabview_get_tab_active(objects.tabview);
-    if (active_index == Tabs::ALL)
-    {
-    }
-    else if (active_index == Tabs::CPU)
+    if (active_index == Tabs::CPU)
     {
         displayCpuDetails();
     }
@@ -418,5 +414,4 @@ void loop()
     displayData();
     lv_timer_handler();
     taskManager.runLoop();
-    lv_label_set_text_fmt(objects.test, "FPS: %.1f", s_smooth.get(0x04));
 }

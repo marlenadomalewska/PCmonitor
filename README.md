@@ -1,4 +1,4 @@
-secet/secrets.h file:
+secret/secrets.h file:
 ```
 #ifndef SECRETS_H
 #define SECRETS_H

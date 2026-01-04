@@ -2,7 +2,6 @@
   "navigation": {
     "selectedUserPageObject": "[monitorGUI.eez-project]:/userPages/0",
     "selectedUserWidgetObject": "[monitorGUI.eez-project]:/userWidgets/0",
-    "selectedActionObject": "[monitorGUI.eez-project]:/actions/0",
     "selectedStyleObject": "[monitorGUI.eez-project]:/lvglStyles/styles/4",
     "selectedThemeColorObject": "[monitorGUI.eez-project]:/colors/0",
     "selectedFontObject": "[monitorGUI.eez-project]:/fonts/8",
@@ -147,6 +146,7 @@
                   "type": "tabset",
                   "id": "#5aa3f0d0-cfe7-4e56-a9a8-c2f380318c37",
                   "weight": 0.4043408774552765,
+                  "selected": 2,
                   "enableClose": false,
                   "children": [
                     {
@@ -189,7 +189,8 @@
                       "enableClose": false,
                       "icon": "svg:hierarchy"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -212,21 +213,9 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 49.63343855888779,
-              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
-                {
-                  "type": "tab",
-                  "id": "#01127d1b-54f8-4d8f-8a8e-b745a1a2590d",
-                  "name": "wifi_widget",
-                  "component": "editor",
-                  "config": {
-                    "objectPath": "[monitorGUI.eez-project]:/userWidgets/0",
-                    "permanent": false
-                  },
-                  "icon": "svg:user_widget"
-                },
                 {
                   "type": "tab",
                   "id": "#8a492a9c-b8a8-4762-94ce-d90079a47254",
@@ -238,8 +227,7 @@
                   },
                   "icon": "svg:page"
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "tabset",
@@ -1013,9 +1001,9 @@
       "selection": {
         "0": {
           "0": {
-            "2": {},
-            "4": {
-              "6": {
+            "1": {},
+            "3": {
+              "0": {
                 "$selected": true
               }
             }
@@ -1024,7 +1012,7 @@
       },
       "transform": {
         "translate": {
-          "x": -304,
+          "x": -404,
           "y": -310
         },
         "scale": 1.25
@@ -1039,9 +1027,7 @@
     "[monitorGUI.eez-project]:/userWidgets/0[flow-state]": {
       "selection": {
         "0": {
-          "0": {
-            "$selected": true
-          }
+          "0": {}
         }
       },
       "transform": {
@@ -1103,6 +1089,16 @@
       }
     },
     "[monitorGUI.eez-project]:/actions/0[flow-state]": {
+      "selection": {},
+      "transform": {
+        "translate": {
+          "x": 0,
+          "y": 0
+        },
+        "scale": 1
+      }
+    },
+    "[monitorGUI.eez-project]:/actions/1[flow-state]": {
       "selection": {},
       "transform": {
         "translate": {

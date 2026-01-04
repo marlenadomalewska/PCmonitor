@@ -710,10 +710,23 @@ void create_screen_main() {
                     {
                         lv_obj_t *parent_obj = obj;
                         {
+                            lv_obj_t *obj = lv_obj_create(parent_obj);
+                            objects.obj0 = obj;
+                            lv_obj_set_pos(obj, -16, -16);
+                            lv_obj_set_size(obj, 480, 268);
+                            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            create_user_widget_wifi_widget(obj, getFlowState(flowState, 71), 2);
+                        }
+                        {
                             // label_date
                             lv_obj_t *obj = lv_label_create(parent_obj);
                             objects.label_date = obj;
-                            lv_obj_set_pos(obj, -16, -16);
+                            lv_obj_set_pos(obj, -16, -1);
                             lv_obj_set_size(obj, 480, LV_SIZE_CONTENT);
                             lv_obj_set_style_text_font(obj, &ui_font_michroma_34, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -723,7 +736,7 @@ void create_screen_main() {
                             // label_second
                             lv_obj_t *obj = lv_label_create(parent_obj);
                             objects.label_second = obj;
-                            lv_obj_set_pos(obj, 248, 115);
+                            lv_obj_set_pos(obj, 248, 130);
                             lv_obj_set_size(obj, 216, 59);
                             lv_obj_set_style_text_color(obj, lv_color_hex(0xff636872), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_font(obj, &ui_font_michroma_50, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -733,7 +746,7 @@ void create_screen_main() {
                             // label_minute
                             lv_obj_t *obj = lv_label_create(parent_obj);
                             objects.label_minute = obj;
-                            lv_obj_set_pos(obj, 243, 25);
+                            lv_obj_set_pos(obj, 243, 40);
                             lv_obj_set_size(obj, 221, 94);
                             lv_obj_set_style_text_color(obj, lv_color_hex(0xff9000ff), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_font(obj, &ui_font_michroma_90, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -743,7 +756,7 @@ void create_screen_main() {
                             // label_hour
                             lv_obj_t *obj = lv_label_create(parent_obj);
                             objects.label_hour = obj;
-                            lv_obj_set_pos(obj, -16, 25);
+                            lv_obj_set_pos(obj, -16, 40);
                             lv_obj_set_size(obj, 259, 119);
                             lv_obj_set_style_text_color(obj, lv_color_hex(0xff00ffaa), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_font(obj, &ui_font_michroma_120, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -752,7 +765,7 @@ void create_screen_main() {
                         }
                         {
                             lv_obj_t *obj = lv_label_create(parent_obj);
-                            lv_obj_set_pos(obj, 15, 172);
+                            lv_obj_set_pos(obj, 15, 187);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_font(obj, &ui_font_michroma_20, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -762,7 +775,7 @@ void create_screen_main() {
                             // slider_brightness
                             lv_obj_t *obj = lv_slider_create(parent_obj);
                             objects.slider_brightness = obj;
-                            lv_obj_set_pos(obj, 15, 202);
+                            lv_obj_set_pos(obj, 15, 217);
                             lv_obj_set_size(obj, 419, 17);
                             lv_slider_set_range(obj, 25, 255);
                             lv_slider_set_value(obj, 100, LV_ANIM_OFF);
@@ -783,19 +796,6 @@ void create_screen_main() {
                             lv_obj_set_style_bg_color(obj, lv_color_hex(0xff00ffaa), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                         }
-                        {
-                            lv_obj_t *obj = lv_obj_create(parent_obj);
-                            objects.obj0 = obj;
-                            lv_obj_set_pos(obj, -16, -16);
-                            lv_obj_set_size(obj, 480, 268);
-                            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            create_user_widget_wifi_widget(obj, getFlowState(flowState, 77), 2);
-                        }
                     }
                 }
             }
@@ -808,7 +808,7 @@ void create_screen_main() {
 void tick_screen_main() {
     void *flowState = getFlowState(0, 0);
     (void)flowState;
-    tick_user_widget_wifi_widget(getFlowState(flowState, 77), 2);
+    tick_user_widget_wifi_widget(getFlowState(flowState, 71), 2);
 }
 
 void create_user_widget_wifi_widget(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex) {

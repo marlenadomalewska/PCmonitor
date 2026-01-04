@@ -327,18 +327,34 @@ void uart_espnow_init(void)
 
 void setupWifi(void *arg)
 {
-    Serial.print("Connecting to ");
-    Serial.println(ssid);
-    WiFi.disconnect(true);
-    WiFi.begin(ssid, password);
-
-    while (1)
-    {
-        while (WiFi.status() != WL_CONNECTED)
+    for (;;)
+    { // Infinite loop for the task
+        if (WiFi.status() != WL_CONNECTED)
         {
-            delay(500);
-            Serial.print(".");
+            WiFi.disconnect();
+            Serial.println("Connecting to WiFi...");
+            WiFi.begin(ssid, password);
+            int timeoutCounter = 60; // 30 seconds timeout
+            while (WiFi.status() != WL_CONNECTED)
+            {
+                vTaskDelay(500 / portTICK_PERIOD_MS); // Wait half a second
+                Serial.print(".");
+                if (timeoutCounter <= 0)
+                {
+                    Serial.println(" Reconnecting to WiFi...");
+                    WiFi.reconnect();
+                    vTaskDelay(5000 / portTICK_PERIOD_MS); // Wait 5 seconds before retrying
+                    timeoutCounter = 60;                   // Reset timeout counter
+                }
+                else
+                {
+                    timeoutCounter--;
+                }
+            }
+            Serial.println("Connected!");
+            // Get IP if needed: Serial.println(WiFi.localIP());
         }
+        vTaskDelay(5000 / portTICK_PERIOD_MS); // Check every 5 seconds
     }
 }
 
@@ -361,6 +377,8 @@ void setup()
     tft.initDMA();
     tft.startWrite();
     tft.setBrightness(80);
+
+    WiFi.mode(WIFI_STA);
 
     lv_init();
 

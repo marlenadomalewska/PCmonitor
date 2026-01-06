@@ -38,7 +38,6 @@
 #include <ESP32Time.h>
 #include "driver/uart.h"
 #include "SmoothValue.h"
-#include <eez-framework.h>
 #include <WiFi.h>
 #include "TaskManagerIO.h"
 #include "ui/ui.h"

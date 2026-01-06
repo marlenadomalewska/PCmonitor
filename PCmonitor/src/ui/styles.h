@@ -32,11 +32,11 @@ lv_style_t *get_style_unit_MAIN_DEFAULT();
 void add_style_unit(lv_obj_t *obj);
 void remove_style_unit(lv_obj_t *obj);
 
-// Style: testbtn
-lv_style_t *get_style_testbtn_MAIN_DEFAULT();
-lv_style_t *get_style_testbtn_MAIN_CHECKED();
-void add_style_testbtn(lv_obj_t *obj);
-void remove_style_testbtn(lv_obj_t *obj);
+// Style: tabButton
+lv_style_t *get_style_tab_button_MAIN_DEFAULT();
+lv_style_t *get_style_tab_button_MAIN_CHECKED();
+void add_style_tab_button(lv_obj_t *obj);
+void remove_style_tab_button(lv_obj_t *obj);
 
 
 

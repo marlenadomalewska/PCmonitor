@@ -176,14 +176,6 @@ uint8_t lvBuffer[2][lvBufferSize];
 static HWMonitor monitor;
 static SmoothValueManager<32> s_smooth(0.05f);
 
-enum Tabs
-{
-    CPU,
-    GPU,
-    RAM,
-    TIME
-};
-
 /* Display flushing */
 void my_disp_flush(lv_display_t *display, const lv_area_t *area, unsigned char *data)
 {
@@ -289,21 +281,19 @@ void displayTime()
 
 void displayData()
 {
-
-    uint8_t active_index = lv_tabview_get_tab_active(objects.tabview);
-    if (active_index == Tabs::CPU)
+    if (lv_obj_is_visible(objects.container_cpu))
     {
         displayCpuDetails();
     }
-    else if (active_index == Tabs::GPU)
+    else if (lv_obj_is_visible(objects.container_gpu))
     {
         displayGpuDetails();
     }
-    else if (active_index == Tabs::RAM)
+    else if (lv_obj_is_visible(objects.container_ram))
     {
         displayRamDetails();
     }
-    else if (active_index == Tabs::TIME)
+    else if (lv_obj_is_visible(objects.container_time))
     {
         displayTime();
     }
